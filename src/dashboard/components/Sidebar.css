@@ -1,0 +1,89 @@
+.sidebar {
+  background: #004e99;
+  color: white;
+  width: 250px;
+  height: 100vh;
+  padding: 15px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.sidebar-link {
+  padding-bottom: 10px;
+}
+
+.sidebar-item a {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-item:hover {
+  background-color: #413f0a;
+  border-radius: 5px;
+}
+
+.sidebar-divider {
+  border: 0.5px solid white;
+  margin: 5px 0;
+}
+
+.submenu {
+  padding-left: 25px;
+  display: block;
+}
+
+.submenu-item {
+  list-style: none; /* Removes default bullet points */
+  padding-bottom: 10px;
+}
+
+.submenu-item a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  color: white;
+}
+
+.submenu-item a:hover {
+  background-color: #005a00;
+  border-radius: 5px;
+}
+
+.sidebar-item {
+  list-style: none; /* Removes default bullet points */
+}
+
+.logout {
+  cursor: pointer;
+}
+
+/* ✅ Hide sidebar by default on mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    margin-top: 50px;
+  }
+
+  /* ✅ Show sidebar when .open is added */
+  .sidebar.open {
+    transform: translateX(0);
+    display: block;
+  }
+}

@@ -1,0 +1,44 @@
+.dashboard-main {
+  margin-left: 250px;
+  padding: 20px;
+  margin-top: 50px;
+  margin-bottom: 0px;
+}
+
+.stats-cards,
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+}
+
+.card .title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.card .count {
+  font-size: 22px;
+}
+
+@media (max-width: 768px) {
+  .stats-cards,
+  .summary-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dashboard-main {
+    margin-left: 0px;
+    padding-right: 40px;
+  }
+}

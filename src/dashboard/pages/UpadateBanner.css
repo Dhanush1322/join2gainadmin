@@ -1,0 +1,88 @@
+.banner-table-container {
+    margin: 90px 10px 20px 270px;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-x: auto; /* Scroll on small screens */
+  }
+  
+  /* Title styling */
+  .table-title {
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  /* Table styling */
+  .banner-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; /* Prevent text wrapping in cells */
+  }
+  
+  .banner-table th,
+  .banner-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .banner-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .banner-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .banner-table tr:hover {
+    background-color: #d1e7fd;
+  }
+  .banner-table td img {
+    width: 50px;  /* Set a fixed width for images */
+    height: auto;
+  }
+  
+  .edit-btn,
+  .delete-btn {
+    padding: 6px 12px;
+    margin: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .delete-btn {
+    background-color: #dc3545;  /* Red for Delete */
+  }
+  
+  .edit-btn:hover,
+  .delete-btn:hover {
+    opacity: 0.8;
+  }
+  
+  .table-title {
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  /* Media Query for Mobile Devices */
+  @media (max-width: 768px) {
+    .banner-table-container {
+        margin: 90px 10px 20px 0px;
+        padding: 1.5rem;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow-x: auto; /* Scroll on small screens */
+      }
+  }
+  

@@ -1,0 +1,19 @@
+.dashboard {
+    display: flex;
+    max-width: 1500px; /* Prevent stretching */
+       /* Center the content */
+       
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 3px; /* Adjust padding as needed */
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .dashboard-content {
+        padding: 0px; /* Smaller padding for mobile devices */
+    }
+}

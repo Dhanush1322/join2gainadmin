@@ -1,0 +1,107 @@
+/* Modern Navbar Styles */
+.navbar {
+  background: linear-gradient(90deg,  #f5ee24,#004e99);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  display: none;
+  font-size: 26px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.hamburger-menu:hover {
+  transform: scale(1.1);
+}
+
+/* Search Bar */
+.navbar-search {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  max-width: 350px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.navbar-search input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #f5ee24;
+  border-radius: 25px;
+  outline: none;
+  font-size: 14px;
+  background: white;
+}
+
+.navbar-search .search-icon {
+  position: absolute;
+  right: 10px;
+  font-size: 16px;
+  color: #ed1b24;
+  cursor: pointer;
+}
+
+/* Dashboard Title */
+.navbar h3 {
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Profile Icon */
+.navbar-profile {
+  font-size: 28px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.navbar-profile:hover {
+  transform: scale(1.2);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: block;
+  }
+
+  .navbar {
+    left: 0;
+    padding: 12px 15px;
+  }
+
+  .navbar-search {
+    display: none;
+  }
+
+  .navbar h3 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 450px) {
+  .navbar h3 {
+    font-size: 16px;
+  }
+
+  .navbar-profile {
+    font-size: 24px;
+  }
+}
