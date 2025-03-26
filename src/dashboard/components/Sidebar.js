@@ -39,44 +39,55 @@ const Sidebar = ({ handleLogout, isOpen }) => {
           {activeMenu === 'profile' && (
             <ul className="submenu">
               <li className="submenu-item">
-                <Link to="/change-password"><Eye size={18} /> Change Password</Link>
+                <Link to="/ChangePassword"><Eye size={18} /> Change Password</Link>
               </li>
             </ul>
           )}
         </li>
         <hr className="sidebar-divider" />
 
-        {/* User KYC */}
-        <li className="sidebar-item">
-          <Link to="/Kyc"><User size={20} /> All User KYC</Link>
-        </li>
-        <hr className="sidebar-divider" />
-
-        {/* User Details */}
-        <li className="sidebar-item" onClick={() => toggleMenu('userDetails')}>
+        {/* Members Section */}
+        <li className="sidebar-item" onClick={() => toggleMenu('members')}>
           <div className="sidebar-link">
-            <User size={20} /> <span>User Details</span>
+            <User size={20} /> <span>Members</span>
           </div>
-          {activeMenu === 'userDetails' && (
+          {activeMenu === 'members' && (
             <ul className="submenu">
-              <li className="submenu-item"><Link to="/AddNewMember"><Edit size={18} /> User List</Link></li>
-              <li className="submenu-item"><Link to="/ViewMatrix"><Eye size={18} /> Rejected User</Link></li>
-              <li className="submenu-item"><Link to="/Dowline"><Eye size={18} /> Blocked User</Link></li>
+              <li className="submenu-item"><Link to="/ViewMembers"><Eye size={18} /> View Members</Link></li>
+              <li className="submenu-item"><Link to="/DeactivatedMember"><Eye size={18} /> Deactivated Members</Link></li>
+              <li className="submenu-item"><Link to="/AwardAchivers"><Eye size={18} /> Award Achievers</Link></li>
+              <li className="submenu-item"><Link to="/InvestmentRequst"><Eye size={18} /> Investment Requests</Link></li>
+              <li className="submenu-item"><Link to="/InvestmentHistory"><Eye size={18} /> Investment History</Link></li>
             </ul>
           )}
         </li>
         <hr className="sidebar-divider" />
 
-        {/* Investments List */}
-        <li className="sidebar-item" onClick={() => toggleMenu('investments')}>
+        {/* KYC Section */}
+        <li className="sidebar-item" onClick={() => toggleMenu('kyc')}>
           <div className="sidebar-link">
-            <FileText size={20} /> <span>Investments List</span>
+            <User size={20} /> <span>KYC</span>
           </div>
-          {activeMenu === 'investments' && (
+          {activeMenu === 'kyc' && (
             <ul className="submenu">
-              <li className="submenu-item"><Link to="/ReTopupList"><Edit size={18} /> Re Topup List</Link></li>
-              <li className="submenu-item"><Link to="/ApprovedList"><Eye size={18} /> Approved List</Link></li>
-              <li className="submenu-item"><Link to="/RejectedList"><Eye size={18} /> Rejected List</Link></li>
+              <li className="submenu-item"><Link to="/KycApproved"><Eye size={18} /> KYC Approved</Link></li>
+              <li className="submenu-item"><Link to="/KYCHistory"><Eye size={18} /> KYC History</Link></li>
+            </ul>
+          )}
+        </li>
+        <hr className="sidebar-divider" />
+
+        {/* Account Transactions Section */}
+        <li className="sidebar-item" onClick={() => toggleMenu('transactions')}>
+          <div className="sidebar-link">
+            <User size={20} /> <span>Account Transactions</span>
+          </div>
+          {activeMenu === 'transactions' && (
+            <ul className="submenu">
+              <li className="submenu-item"><Link to="/WithdrawRequst"><Edit size={18} /> Withdraw Request</Link></li>
+              <li className="submenu-item"><Link to="/WithdrawHistory"><Eye size={18} /> Withdraw History</Link></li>
+              <li className="submenu-item"><Link to="/AccountByDate"><Edit size={18} /> Account By Date</Link></li>
+              <li className="submenu-item"><Link to="/AccountByUser"><Eye size={18} /> Account By User</Link></li>
             </ul>
           )}
         </li>
@@ -89,9 +100,23 @@ const Sidebar = ({ handleLogout, isOpen }) => {
           </div>
           {activeMenu === 'reports' && (
             <ul className="submenu">
-              <li className="submenu-item"><Link to="/TDSReport"><Edit size={18} /> TDS Report</Link></li>
+              <li className="submenu-item"><Link to="/WalletReports"><Edit size={18} /> Wallet Reports</Link></li>
+              <li className="submenu-item"><Link to="/TDSReports"><Eye size={18} /> TDS Reports</Link></li>
               <li className="submenu-item"><Link to="/IncomeEstimate"><Eye size={18} /> Income Estimate</Link></li>
               <li className="submenu-item"><Link to="/RankAchievers"><Eye size={18} /> Rank Achievers</Link></li>
+            </ul>
+          )}
+        </li>
+        <hr className="sidebar-divider" />
+
+        {/* More Links Section */}
+        <li className="sidebar-item" onClick={() => toggleMenu('moreLinks')}>
+          <div className="sidebar-link">
+            <FileText size={20} /> <span>More Links</span>
+          </div>
+          {activeMenu === 'moreLinks' && (
+            <ul className="submenu">
+              <li className="submenu-item"><Link to="/News"><Edit size={18} /> News</Link></li>
             </ul>
           )}
         </li>

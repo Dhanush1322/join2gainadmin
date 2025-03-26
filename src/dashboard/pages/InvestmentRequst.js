@@ -1,13 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import './DashboardPage.css';
+import InvestmentRequstTable from '../components/InvestmentRequstTable';
 
-import DashboardMain from '../components/DashboardMain';
-
-function DashboardPage() {
+function InvestmentRequst() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
@@ -41,11 +39,11 @@ function DashboardPage() {
       <div className="dashboard-content">
         <Navbar toggleSidebar={toggleSidebar} />
         <div style={{ marginTop: '100px', marginLeft }}>
-          <DashboardMain />
+          <InvestmentRequstTable />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default DashboardPage;
+export default InvestmentRequst
