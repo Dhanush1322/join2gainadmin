@@ -6,6 +6,7 @@ import DashboardPage from "./dashboard/pages/DashboardPage";
 import AdminLogin from "./dashboard/adminlogin/AdminLogin";
 import ChangePassword from "./dashboard/pages/ChangePassword";
 import ViewMembers from "./dashboard/pages/ViewMembers";
+import ViewPlan from "./dashboard/pages/ViewPlan";
 import DeactivatedMember from "./dashboard/pages/DeactivatedMember";
 import AwardAchivers from "./dashboard/pages/AwardAchivers";
 import InvestmentRequst from "./dashboard/pages/InvestmentRequst";
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/Dashboard" element={<DashboardPage />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/ViewMembers" element={<ViewMembers />} />
+          <Route path="/ViewPlan/:id"  element={<ViewPlan />} />
           <Route path="/DeactivatedMember" element={<DeactivatedMember />} />
           <Route path="/AwardAchivers" element={<AwardAchivers />} />
           <Route path="/InvestmentRequst" element={<InvestmentRequst />} />
