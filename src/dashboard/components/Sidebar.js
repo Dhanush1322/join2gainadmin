@@ -54,7 +54,8 @@ const Sidebar = ({ handleLogout, isOpen }) => {
           {activeMenu === 'members' && (
             <ul className="submenu">
               <li className="submenu-item"><Link to="/ViewMembers"><Eye size={18} /> View Members</Link></li>
-              <li className="submenu-item"><Link to="/DeactivatedMember"><Eye size={18} /> Deactivated Members</Link></li>
+                {/* Members Section 
+              <li className="submenu-item"><Link to="/DeactivatedMember"><Eye size={18} /> Deactivated Members</Link></li>*/}
               <li className="submenu-item"><Link to="/AwardAchivers"><Eye size={18} /> Award Achievers</Link></li>
               <li className="submenu-item"><Link to="/InvestmentRequst"><Eye size={18} /> Investment Requests</Link></li>
               <li className="submenu-item"><Link to="/InvestmentHistory"><Eye size={18} /> Investment History</Link></li>
@@ -86,14 +87,16 @@ const Sidebar = ({ handleLogout, isOpen }) => {
             <ul className="submenu">
               <li className="submenu-item"><Link to="/WithdrawRequst"><Edit size={18} /> Withdraw Request</Link></li>
               <li className="submenu-item"><Link to="/WithdrawHistory"><Eye size={18} /> Withdraw History</Link></li>
+              
+        {/* Account Transactions Section 
               <li className="submenu-item"><Link to="/AccountByDate"><Edit size={18} /> Account By Date</Link></li>
-              <li className="submenu-item"><Link to="/AccountByUser"><Eye size={18} /> Account By User</Link></li>
+              <li className="submenu-item"><Link to="/AccountByUser"><Eye size={18} /> Account By User</Link></li>*/}
             </ul>
           )}
         </li>
         <hr className="sidebar-divider" />
 
-        {/* Reports Section */}
+        {/* Reports Section 
         <li className="sidebar-item" onClick={() => toggleMenu('reports')}>
           <div className="sidebar-link">
             <FileText size={20} /> <span>Reports</span>
@@ -107,7 +110,7 @@ const Sidebar = ({ handleLogout, isOpen }) => {
             </ul>
           )}
         </li>
-        <hr className="sidebar-divider" />
+        <hr className="sidebar-divider" />*/}
 
         {/* More Links Section */}
         <li className="sidebar-item" onClick={() => toggleMenu('moreLinks')}>

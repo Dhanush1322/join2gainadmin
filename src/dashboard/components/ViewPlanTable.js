@@ -17,35 +17,39 @@ function ViewPlanTable({ userId }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Use the userId prop to fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/user/getTopUp/${userId}`, {
+        const response = await fetch(`http://jointogain.ap-1.evennode.com/api/user/getTopUp/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-  
+
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
-  
+
         const result = await response.json();
-  
-        // Check if investment_info exists
+
         if (result.investment_info && result.investment_info.length > 0) {
-          // Map your data in the format needed for the table
-          const formattedData = result.investment_info.map((item, index) => ({
-            sNo: index + 1,
-            requestDate: new Date(item.invest_apply_date).toLocaleDateString(),
-            approvedDate: item.invest_confirm_date ? new Date(item.invest_confirm_date).toLocaleDateString() : 'Pending',
-            investment: item.invest_amount,
-            status: item.invest_confirm_date ? 'Active' : 'Pending',
-            roiLeft: item.invest_duration_in_month, // If you need to show remaining months
-          }));
-  
+          const formattedData = result.investment_info.map((item, index) => {
+            const approvedPayouts = item.roi_payout_status.filter(payout => payout.status === 'Approved').length;
+            const roiLeft = item.invest_duration_in_month - approvedPayouts;
+
+            return {
+              sNo: index + 1,
+              requestDate: new Date(item.invest_apply_date).toLocaleDateString(),
+              approvedDate: item.invest_confirm_date ? new Date(item.invest_confirm_date).toLocaleDateString() : 'Pending',
+              investment: item.invest_amount,
+              investment_type: item.invest_type,
+              invest_duration_in_month: item.invest_duration_in_month,
+              status: item.invest_confirm_date ? 'Active' : 'Pending',
+              roiLeft: roiLeft,
+            };
+          });
+
           setData(formattedData);
         } else {
           console.log('No investment data available');
@@ -54,10 +58,10 @@ function ViewPlanTable({ userId }) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
-  }, [userId]); // Re-fetch data when userId changes
-  
+  }, [userId]);
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -81,9 +85,10 @@ function ViewPlanTable({ userId }) {
               <TableCell>SNo.</TableCell>
               <TableCell>Request Date</TableCell>
               <TableCell>Approved Date</TableCell>
-              <TableCell>Plan</TableCell>
+              <TableCell>Invest Type</TableCell>
               <TableCell>Investment (Rs)</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Invest Duration </TableCell>
               <TableCell>ROI Left</TableCell>
             </TableRow>
           </TableHead>
@@ -93,9 +98,21 @@ function ViewPlanTable({ userId }) {
                 <TableCell>{row.sNo}</TableCell>
                 <TableCell>{row.requestDate}</TableCell>
                 <TableCell>{row.approvedDate}</TableCell>
-                <TableCell>{row.approvedDate}</TableCell>
+                <TableCell>{row.investment_type}</TableCell>
                 <TableCell>{row.investment.toLocaleString()}</TableCell>
-                <TableCell>{row.status}</TableCell>
+                <TableCell
+                  style={{
+                    color:
+                      row.status === 'Approved' ? 'blue' :
+                      row.status === 'Reject' ? 'red' :
+                      row.status === 'Active' ? 'green' :
+                      row.status === 'Pending' ? 'orange' : 'black',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {row.status}
+                </TableCell>
+                <TableCell>{row.invest_duration_in_month}</TableCell>
                 <TableCell>{row.roiLeft}</TableCell>
               </TableRow>
             ))}

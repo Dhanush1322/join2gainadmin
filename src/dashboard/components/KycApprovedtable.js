@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -13,38 +13,39 @@ import {
   DialogTitle,
   DialogContent,
 } from "@mui/material";
+import axios from "axios";
 
 function KycApprovedTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDialog, setOpenDialog] = useState(false);
-  const [dialogContent, setDialogContent] = useState("");
+  const [dialogContent, setDialogContent] = useState(null);
+  const [kycData, setKycData] = useState([]);
   const recordsPerPage = 5;
 
-  const kycData = [
-    { id: 1, username: "G100001", name: "Join2Gain", date: "03/Jan/2025 03:38 PM", pan: "View", aadhar: "View", bank: "View", status: "Approved" },
-    { id: 2, username: "G584288", name: "SANKAPPA CHATRAD", date: "12/Feb/2025 03:32 PM", pan: "View", aadhar: "", bank: "", status: "Approved" },
-  ];
+  useEffect(() => {
+    axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers")
+      .then(response => {
+        if (response.data.Status) {
+          setKycData(response.data.data);
+        }
+      })
+      .catch(error => console.error("Error fetching data:", error));
+  }, []);
 
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = kycData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(kycData.length / recordsPerPage);
 
-  const handleStatusToggle = (id) => {
-    const updatedData = kycData.map((item) =>
-      item.id === id ? { ...item, status: item.status === "Approved" ? "Rejected" : "Approved" } : item
-    );
-    console.log(updatedData);
-  };
-
-  const handleView = (content) => {
-    setDialogContent(content);
+  const handleView = (filePath) => {
+    if (!filePath || filePath.trim() === "") return;
+    setDialogContent(`http://jointogain.ap-1.evennode.com/api/user/downloadAadharFile/${filePath}`);
     setOpenDialog(true);
   };
 
   return (
     <Paper sx={{ padding: 2, margin: 2 }}>
-        <h3>KYC Details</h3>
+      <h3>KYC Details</h3>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -52,37 +53,33 @@ function KycApprovedTable() {
               <TableCell>SNo.</TableCell>
               <TableCell>Username</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>PAN/CR</TableCell>
+              <TableCell>Date of Birth</TableCell>
+              <TableCell>PAN</TableCell>
               <TableCell>AADHAR</TableCell>
               <TableCell>Bank Passbook</TableCell>
-              <TableCell>Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentRecords.map((record, index) => (
-              <TableRow key={record.id}>
+              <TableRow key={record._id}>
                 <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-                <TableCell>{record.username}</TableCell>
+                <TableCell>{record.user_profile_id}</TableCell>
                 <TableCell>{record.name}</TableCell>
-                <TableCell>{record.date}</TableCell>
+                <TableCell>{new Date(record.date_of_birth).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  {record.pan && <Button onClick={() => handleView("PAN Details")}>View</Button>}
+                  {record.uploaded_pan_file && (
+                    <Button onClick={() => handleView(record.uploaded_pan_file)}>View</Button>
+                  )}
                 </TableCell>
                 <TableCell>
-                  {record.aadhar && <Button onClick={() => handleView("Aadhar Details")}>View</Button>}
+                  {record.uploaded_aadher_file && (
+                    <Button onClick={() => handleView(record.uploaded_aadher_file)}>View</Button>
+                  )}
                 </TableCell>
                 <TableCell>
-                  {record.bank && <Button onClick={() => handleView("Bank Passbook Details")}>View</Button>}
-                </TableCell>
-                <TableCell>
-                  <Button 
-                    variant="contained"
-                    color={record.status === "Approved" ? "success" : "error"}
-                    onClick={() => handleStatusToggle(record.id)}
-                  >
-                    {record.status}
-                  </Button>
+                  {record.uploaded_bank_passbook_file && (
+                    <Button onClick={() => handleView(record.uploaded_bank_passbook_file)}>View</Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -100,7 +97,7 @@ function KycApprovedTable() {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>View Document</DialogTitle>
         <DialogContent>
-          {dialogContent}
+          {dialogContent && <img src={dialogContent} alt="Document" style={{ width: "100%" }} />}
         </DialogContent>
       </Dialog>
     </Paper>

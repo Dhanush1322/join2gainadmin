@@ -25,7 +25,7 @@ function ViewMembersForm() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/user/getUsers");
+        const response = await axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers");
         if (response.data.Status) {
           const usersData = response.data.data;
           setUsers(usersData);
@@ -103,10 +103,24 @@ function ViewMembersForm() {
                   </TableCell>
 
                   <TableCell>
-                    <Button variant="contained" color="primary" size="small">View</Button>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      size="small"
+                      onClick={() => navigate(`/VieAllProfile/${row._id}`)} // Navigate to /ViewPlan with _id
+                    >
+                      View
+                    </Button>
                   </TableCell>
                   <TableCell>
-                    <Button variant="contained" color="secondary" size="small">View</Button>
+                    <Button 
+                    variant="contained"
+                     color="secondary" 
+                     size="small"
+                     onClick={() => navigate(`/ViewAllDownline/${row._id}`)} 
+                     >
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               );

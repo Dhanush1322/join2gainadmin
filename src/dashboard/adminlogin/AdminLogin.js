@@ -11,7 +11,7 @@ function AdminLogin() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/loginAdmin', {
+      const response = await axios.post('http://jointogain.ap-1.evennode.com/api/admin/loginAdmin', {
         email_id: email,
         password: password,
       }, { headers: { "Content-Type": "application/json" } });

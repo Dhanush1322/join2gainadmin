@@ -16,6 +16,8 @@ import KycHistory from "./dashboard/pages/KycHistory";
 import WithdrawRequst from "./dashboard/pages/WithdrawRequst";
 import WithdrawHistory from "./dashboard/pages/WithdrawHistory";
 import News from "./dashboard/pages/News";
+import VieAllProfile from "./dashboard/pages/VieAllProfile";
+import ViewAllDownline from "./dashboard/pages/ViewAllDownline";
 const App = () => {
   return (
     <div className="app-container">
@@ -36,6 +38,8 @@ const App = () => {
           <Route path="/WithdrawRequst" element={<WithdrawRequst />} />
           <Route path="/WithdrawHistory" element={<WithdrawHistory />} />
           <Route path="/News" element={<News />} />
+          <Route path="/VieAllProfile/:id" element={<VieAllProfile />} />
+          <Route path="/ViewAllDownline/:id" element={<ViewAllDownline />} />
         </Routes>
        
       </Router>
