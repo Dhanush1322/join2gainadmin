@@ -18,6 +18,9 @@ import WithdrawHistory from "./dashboard/pages/WithdrawHistory";
 import News from "./dashboard/pages/News";
 import VieAllProfile from "./dashboard/pages/VieAllProfile";
 import ViewAllDownline from "./dashboard/pages/ViewAllDownline";
+import LevelInclomeList from "./dashboard/pages/LevelInclomeList";
+import LevelIncomePaidList from "./dashboard/pages/LevelIncomePaidList";
+import AddUser from "./dashboard/pages/AddUser";
 const App = () => {
   return (
     <div className="app-container">
@@ -26,6 +29,7 @@ const App = () => {
         <Routes>
         <Route path="/" element={<AdminLogin />} />
           <Route path="/Dashboard" element={<DashboardPage />} />
+          <Route path="/AddUser" element={<AddUser />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/ViewMembers" element={<ViewMembers />} />
           <Route path="/ViewPlan/:id"  element={<ViewPlan />} />
@@ -40,6 +44,8 @@ const App = () => {
           <Route path="/News" element={<News />} />
           <Route path="/VieAllProfile/:id" element={<VieAllProfile />} />
           <Route path="/ViewAllDownline/:id" element={<ViewAllDownline />} />
+          <Route path="/LevelInclomeList" element={<LevelInclomeList />} />
+          <Route path="/LevelIncomePaidList" element={<LevelIncomePaidList />} />
         </Routes>
        
       </Router>

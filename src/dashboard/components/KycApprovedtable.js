@@ -1,106 +1,212 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Button,
-  Pagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
+  CircularProgress,
+  Box
 } from "@mui/material";
-import axios from "axios";
+import Swal from "sweetalert2";
 
 function KycApprovedTable() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [users, setUsers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogContent, setDialogContent] = useState(null);
-  const [kycData, setKycData] = useState([]);
-  const recordsPerPage = 5;
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers")
-      .then(response => {
-        if (response.data.Status) {
-          setKycData(response.data.data);
+  const fetchUsers = () => {
+    setLoading(true);
+    fetch("https://jointogain.ap-1.evennode.com/api/user/getUsers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.Status) {
+          setUsers(data.data);
         }
       })
-      .catch(error => console.error("Error fetching data:", error));
+      .catch((err) => {
+        console.error("Error fetching users:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = kycData.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(kycData.length / recordsPerPage);
-
-  const handleView = (filePath) => {
-    if (!filePath || filePath.trim() === "") return;
-    setDialogContent(`http://jointogain.ap-1.evennode.com/api/user/downloadAadharFile/${filePath}`);
+  const handleView = (fileUrl) => {
+    if (!fileUrl || fileUrl.trim() === "") return;
+    setDialogContent(fileUrl);
     setOpenDialog(true);
   };
 
+  const getFileUrl = (type, fileName) => {
+    const baseUrls = {
+      aadhar: "https://jointogain.ap-1.evennode.com/api/user/downloadAadharFile/",
+      pan: "https://jointogain.ap-1.evennode.com/api/user/downloadPanFile/",
+      bank: "https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile/",
+    };
+    return `${baseUrls[type]}${fileName}`;
+  };
+
+  const handleKycStatus = (userId, status) => {
+    Swal.fire({
+      title: `Are you sure you want to ${status.toLowerCase()} this user?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: `Yes, ${status}`,
+      cancelButtonText: "Cancel",
+      confirmButtonColor: status === "Approved" ? "#28a745" : "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`https://jointogain.ap-1.evennode.com/api/admin/kycApprovedRejected/${userId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ kyc_status: status }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.data.Status) {
+              fetchUsers(); // Refresh data
+              Swal.fire({
+                title: `User ${status} successfully!`,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+            } else {
+              Swal.fire("Error", `Failed to ${status.toLowerCase()} user.`, "error");
+            }
+          })
+          .catch((err) => {
+            console.error(`${status} error:`, err);
+            Swal.fire("Error", `Error updating status to ${status}.`, "error");
+          });
+      }
+    });
+  };
+
   return (
-    <Paper sx={{ padding: 2, margin: 2 }}>
-      <h3>KYC Details</h3>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>SNo.</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Date of Birth</TableCell>
-              <TableCell>PAN</TableCell>
-              <TableCell>AADHAR</TableCell>
-              <TableCell>Bank Passbook</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {currentRecords.map((record, index) => (
-              <TableRow key={record._id}>
-                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-                <TableCell>{record.user_profile_id}</TableCell>
-                <TableCell>{record.name}</TableCell>
-                <TableCell>{new Date(record.date_of_birth).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  {record.uploaded_pan_file && (
-                    <Button onClick={() => handleView(record.uploaded_pan_file)}>View</Button>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {record.uploaded_aadher_file && (
-                    <Button onClick={() => handleView(record.uploaded_aadher_file)}>View</Button>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {record.uploaded_bank_passbook_file && (
-                    <Button onClick={() => handleView(record.uploaded_bank_passbook_file)}>View</Button>
-                  )}
-                </TableCell>
+    <div style={{ padding: "16px" }}>
+      <Typography variant="h4" gutterBottom>
+        All Users with KYC Documents
+      </Typography>
+
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Name</strong></TableCell>
+                <TableCell><strong>Email</strong></TableCell>
+                <TableCell><strong>Status</strong></TableCell>
+                <TableCell><strong>KYC Documents</strong></TableCell>
+                <TableCell><strong>Actions</strong></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      
-      <Pagination
-        count={totalPages}
-        page={currentPage}
-        onChange={(event, value) => setCurrentPage(value)}
-        sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}
-      />
-      
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            </TableHead>
+            <TableBody>
+              {users
+                .filter(
+                  (user) =>
+                    user.kyc_status?.trim() === "" ||
+                    user.kyc_status?.trim() === "Rejected" ||
+                    user.kyc_status?.trim() === "Pending"
+                )
+                .map((user) => (
+                  <TableRow key={user._id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.kyc_status || "Pending"}</TableCell>
+                    <TableCell>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {user.uploaded_aadher_file?.trim() !== "" && (
+                          <Button
+                            variant="outlined"
+                            onClick={() =>
+                              handleView(getFileUrl("aadhar", user.uploaded_aadher_file))
+                            }
+                          >
+                            View Aadhar
+                          </Button>
+                        )}
+                        {user.uploaded_pan_file?.trim() !== "" && (
+                          <Button
+                            variant="outlined"
+                            onClick={() =>
+                              handleView(getFileUrl("pan", user.uploaded_pan_file))
+                            }
+                          >
+                            View PAN
+                          </Button>
+                        )}
+                        {user.uploaded_bank_passbook_file?.trim() !== "" && (
+                          <Button
+                            variant="outlined"
+                            onClick={() =>
+                              handleView(
+                                getFileUrl("bank", user.uploaded_bank_passbook_file)
+                              )
+                            }
+                          >
+                            View Passbook
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={() => handleKycStatus(user._id, "Approved")}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleKycStatus(user._id, "Rejected")}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>View Document</DialogTitle>
         <DialogContent>
-          {dialogContent && <img src={dialogContent} alt="Document" style={{ width: "100%" }} />}
+          {dialogContent && (
+            <img
+              src={dialogContent}
+              alt="Document"
+              style={{ width: "100%", marginTop: 10, borderRadius: 8 }}
+            />
+          )}
         </DialogContent>
       </Dialog>
-    </Paper>
+    </div>
   );
 }
 

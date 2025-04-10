@@ -21,19 +21,12 @@ function InvestmentRequestTable() {
   const recordsPerPage = 5;
   const [statusData, setStatusData] = useState({});
 
-  useEffect(() => {
-    fetch("http://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
+  const fetchInvestmentData = () => {
+    fetch("https://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Full API Response:", data);
-
-        if (!data || !data.Status) {
-          console.error("Invalid API response:", data);
-          return;
-        }
-
-        if (!data.users || !Array.isArray(data.users)) {
-          console.error("Users data is missing or not an array:", data.users);
+        if (!data?.Status || !Array.isArray(data.users)) {
+          console.error("Invalid data", data);
           return;
         }
 
@@ -43,20 +36,22 @@ function InvestmentRequestTable() {
             invest_amount: invest.invest_amount,
             utr_no: invest.utr_no,
             uploaded_proof_file: invest.uploaded_proof_file,
-            id: invest._id, // Unique ID
+            id: invest._id,
             investment_status: invest.investment_status || " ",
           })) || []
         );
 
-        // ✅ Filter only "Pending" investments
         const pendingInvestments = investments.filter(
           (invest) => invest.investment_status === " "
         );
 
-        console.log("Filtered Pending Investments:", pendingInvestments);
         setInvestmentData(pendingInvestments);
       })
       .catch((error) => console.error("Error fetching data:", error));
+  };
+
+  useEffect(() => {
+    fetchInvestmentData();
   }, []);
 
   const handleStatusChange = (id, newStatus) => {
@@ -65,8 +60,8 @@ function InvestmentRequestTable() {
 
   const handleSubmit = (id) => {
     const selectedStatus = statusData[id] || "Pending";
-  
-    fetch(`http://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
+
+    fetch(`https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ investment_status: selectedStatus }),
@@ -75,21 +70,21 @@ function InvestmentRequestTable() {
       .then((data) => {
         if (data.success) {
           Swal.fire({
-            title: selectedStatus === "Approved" ? "Approved " : "Rejected ",
+            title: selectedStatus === "Approved" ? "Approved" : "Rejected",
             text: `Investment request has been ${selectedStatus.toLowerCase()} successfully!`,
-            icon: "success", // ✅ Always success icon
+            icon: "success",
             confirmButtonColor: "#3085d6",
+          }).then(() => {
+            fetchInvestmentData(); // 🔁 Fetch updated data after submission
           });
-  
-          setInvestmentData((prevData) =>
-            prevData.filter((investment) => investment.id !== id)
-          );
         } else {
           Swal.fire({
             title: "Success",
             text: data.message || "Status updated successfully!",
-            icon: "success", // ✅ Always success icon
+            icon: "success",
             confirmButtonColor: "#3085d6",
+          }).then(() => {
+            fetchInvestmentData();
           });
         }
       })
@@ -103,7 +98,7 @@ function InvestmentRequestTable() {
         });
       });
   };
-  
+
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = investmentData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -135,10 +130,23 @@ function InvestmentRequestTable() {
                 <TableCell>₹{record.invest_amount.toLocaleString()}</TableCell>
                 <TableCell>{record.utr_no}</TableCell>
                 <TableCell>
-                  <a href={record.uploaded_proof_file} target="_blank" rel="noopener noreferrer">
-                    View Proof
-                  </a>
+                  {record.uploaded_proof_file ? (
+                    <a
+                      href={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile/${record.uploaded_proof_file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile/${record.uploaded_proof_file}`}
+                        alt="Proof"
+                        style={{ width: "100px", height: "auto", borderRadius: "5px" }}
+                      />
+                    </a>
+                  ) : (
+                    "No file"
+                  )}
                 </TableCell>
+
                 <TableCell>
                   <Select
                     value={statusData[record.id] || "Pending"}
@@ -151,7 +159,11 @@ function InvestmentRequestTable() {
                   </Select>
                 </TableCell>
                 <TableCell>
-                  <Button variant="contained" color="primary" onClick={() => handleSubmit(record.id)}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleSubmit(record.id)}
+                  >
                     Submit
                   </Button>
                 </TableCell>

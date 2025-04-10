@@ -14,7 +14,7 @@ const WithdrawHistoryTable = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers");
+      const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
       const formattedData = response.data.data.flatMap((user) =>
         user.investment_info?.flatMap((investment) => {
           // Count Approved Payouts
@@ -67,7 +67,7 @@ const WithdrawHistoryTable = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axios.post("http://jointogain.ap-1.evennode.com/api/admin/withdrowApprovedRejected", {
+          const response = await axios.post("https://jointogain.ap-1.evennode.com/api/admin/withdrowApprovedRejected", {
             userId: id,
             investmentId: investmentid,
             status: "Approved",

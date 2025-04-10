@@ -36,7 +36,7 @@ const VieAllProfileform = ({ userId }) => {
   useEffect(() => {
     if (userId) {
       axios
-        .get(`http://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`)
+        .get(`https://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`)
         .then((response) => {
           console.log("API Response:", response.data);
           if (response.data && response.data.data && response.data.data.data) {

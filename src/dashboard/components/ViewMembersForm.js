@@ -25,7 +25,7 @@ function ViewMembersForm() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers");
+        const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
         if (response.data.Status) {
           const usersData = response.data.data;
           setUsers(usersData);

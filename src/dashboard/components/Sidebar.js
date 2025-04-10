@@ -30,6 +30,10 @@ const Sidebar = ({ handleLogout, isOpen }) => {
           <Link to="/Dashboard"><User size={20} /> Dashboard</Link>
         </li>
         <hr className="sidebar-divider" />
+        <li className="sidebar-item">
+          <Link to="/AddUser"><User size={20} /> Add User</Link>
+        </li>
+        <hr className="sidebar-divider" />
 
         {/* Profile Section */}
         <li className="sidebar-item" onClick={() => toggleMenu('profile')}>
@@ -54,7 +58,7 @@ const Sidebar = ({ handleLogout, isOpen }) => {
           {activeMenu === 'members' && (
             <ul className="submenu">
               <li className="submenu-item"><Link to="/ViewMembers"><Eye size={18} /> View Members</Link></li>
-                {/* Members Section 
+              {/* Members Section 
               <li className="submenu-item"><Link to="/DeactivatedMember"><Eye size={18} /> Deactivated Members</Link></li>*/}
               <li className="submenu-item"><Link to="/AwardAchivers"><Eye size={18} /> Award Achievers</Link></li>
               <li className="submenu-item"><Link to="/InvestmentRequst"><Eye size={18} /> Investment Requests</Link></li>
@@ -81,20 +85,38 @@ const Sidebar = ({ handleLogout, isOpen }) => {
         {/* Account Transactions Section */}
         <li className="sidebar-item" onClick={() => toggleMenu('transactions')}>
           <div className="sidebar-link">
-            <User size={20} /> <span>Account Transactions</span>
+            <User size={20} /> <span>ROI Income</span>
           </div>
           {activeMenu === 'transactions' && (
             <ul className="submenu">
-              <li className="submenu-item"><Link to="/WithdrawRequst"><Edit size={18} /> Withdraw Request</Link></li>
-              <li className="submenu-item"><Link to="/WithdrawHistory"><Eye size={18} /> Withdraw History</Link></li>
-              
-        {/* Account Transactions Section 
+              <li className="submenu-item"><Link to="/WithdrawRequst"><Edit size={18} />ROI Withdraw Request</Link></li>
+              <li className="submenu-item"><Link to="/WithdrawHistory"><Eye size={18} />ROI Withdraw History</Link></li>
+
+              {/* Account Transactions Section 
               <li className="submenu-item"><Link to="/AccountByDate"><Edit size={18} /> Account By Date</Link></li>
               <li className="submenu-item"><Link to="/AccountByUser"><Eye size={18} /> Account By User</Link></li>*/}
             </ul>
           )}
         </li>
         <hr className="sidebar-divider" />
+
+        {/* Account Transactions Section */}
+        <li className="sidebar-item" onClick={() => toggleMenu('Level')}>
+          <div className="sidebar-link">
+            <User size={20} /> <span>Level Incomes List</span>
+          </div>
+          {activeMenu === 'Level' && (
+            <ul className="submenu">
+              <li className="submenu-item"><Link to="/LevelInclomeList"><Edit size={18} />Level Withdraw Request</Link></li>
+              <li className="submenu-item"><Link to="/LevelIncomePaidList"><Eye size={18} />Level Withdraw History</Link></li>
+
+              {/* Account Transactions Section 
+      <li className="submenu-item"><Link to="/AccountByDate"><Edit size={18} /> Account By Date</Link></li>
+      <li className="submenu-item"><Link to="/AccountByUser"><Eye size={18} /> Account By User</Link></li>*/}
+            </ul>
+          )}
+        </li>
+
 
         {/* Reports Section 
         <li className="sidebar-item" onClick={() => toggleMenu('reports')}>
@@ -112,7 +134,7 @@ const Sidebar = ({ handleLogout, isOpen }) => {
         </li>
         <hr className="sidebar-divider" />*/}
 
-        {/* More Links Section */}
+        {/* More Links Section 
         <li className="sidebar-item" onClick={() => toggleMenu('moreLinks')}>
           <div className="sidebar-link">
             <FileText size={20} /> <span>More Links</span>
@@ -122,7 +144,7 @@ const Sidebar = ({ handleLogout, isOpen }) => {
               <li className="submenu-item"><Link to="/News"><Edit size={18} /> News</Link></li>
             </ul>
           )}
-        </li>
+        </li>*/}
         <hr className="sidebar-divider" />
 
         {/* Logout */}

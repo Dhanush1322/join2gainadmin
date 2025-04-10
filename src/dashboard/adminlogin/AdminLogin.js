@@ -11,14 +11,21 @@ function AdminLogin() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://jointogain.ap-1.evennode.com/api/admin/loginAdmin', {
+      const response = await axios.post('https://jointogain.ap-1.evennode.com/api/admin/loginAdmin', {
         email_id: email,
         password: password,
-      }, { headers: { "Content-Type": "application/json" } });
+      }, {
+        headers: { "Content-Type": "application/json" }
+      });
   
-      console.log("API Response:", response.data); // Debugging
+      console.log("API Response:", response.data);
   
-      if (response.data.status) {  // Check if login is successful
+      if (response.data.status) {
+        // Store token and user data in localStorage
+        localStorage.setItem('adminToken', response.data.token);
+        localStorage.setItem('id', response.data.data._id);
+
+  
         Swal.fire({
           icon: 'success',
           title: 'Login Successful',
@@ -39,12 +46,12 @@ function AdminLogin() {
       });
     }
   };
-   return (
+    return (
     <Container maxWidth="sm" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2, width: '100%', maxWidth: 400 }}>
         <CardContent>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <img src='../../img/join.png' alt="Admin" style={{ width: '100px' }} />
+            <img src='./img/logoo.png' alt="Admin" style={{ width: '100px' }} />
           </div>
           <Typography variant="h5" align="center" gutterBottom>
             Admin Login

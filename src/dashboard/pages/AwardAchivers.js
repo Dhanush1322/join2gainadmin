@@ -13,7 +13,7 @@ function AwardAchivers() {
         // ✅ Logout function - Remove token & Redirect
         const handleLogout = () => {
           localStorage.removeItem("authToken"); // Remove token
-          navigate("/admin"); // Redirect to login page
+          navigate("/"); // Redirect to login page
         };
       
         const toggleSidebar = () => {

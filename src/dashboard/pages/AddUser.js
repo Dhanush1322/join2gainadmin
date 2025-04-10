@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import './DashboardPage.css';
-import KycHistoryTable from '../components/KycHistoryTable';
 
-function KycHistory() {
+import DashboardMain from '../components/DashboardMain';
+import AddUserForm from '../components/AddUserForm';
+
+function AddUser() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
@@ -39,11 +42,11 @@ function KycHistory() {
       <div className="dashboard-content">
         <Navbar toggleSidebar={toggleSidebar} />
         <div style={{ marginTop: '100px', marginLeft }}>
-          <KycHistoryTable />
+          <AddUserForm />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default KycHistory
+export default AddUser;

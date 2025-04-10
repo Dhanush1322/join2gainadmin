@@ -9,6 +9,8 @@
   top: 0;
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
+  overflow-y: auto; /* Add vertical scrollbar when needed */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .sidebar-menu {

@@ -24,7 +24,7 @@ function ViewAllDownlineTable({ userId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`, {
+        const response = await fetch(`https://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

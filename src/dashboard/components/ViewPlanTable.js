@@ -20,7 +20,7 @@ function ViewPlanTable({ userId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://jointogain.ap-1.evennode.com/api/user/getTopUp/${userId}`, {
+        const response = await fetch(`https://jointogain.ap-1.evennode.com/api/user/getTopUp/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

@@ -19,7 +19,7 @@ function InvestmentHistoryTable() {
   const recordsPerPage = 10;
 
   useEffect(() => {
-    fetch("http://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
+    fetch("https://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
       .then((response) => response.json())
       .then((data) => {
         console.log("API Response:", data); // Debugging

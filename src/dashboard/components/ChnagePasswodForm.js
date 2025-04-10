@@ -16,44 +16,38 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 function ChangePasswordForm() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2NhOGEzODEyMGI2ZGQ5N2RkYWU0MzUiLCJlbWFpbCI6Im11aGFtbWFkc2hvYWliMjgwM0BnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJhdXRoVG9rZW4iOnRydWUsImlhdCI6MTc0MTU4OTg5MCwiZXhwIjoxODI3OTg5ODkwfQ.aXD4mCR8bkLKLP_AJpxkw0t-laVLxNCXMZGqtvfe32U"; // Replace with actual token retrieval logic
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
+  const token = localStorage.getItem("adminToken");
+  const adminId = localStorage.getItem("id"); // Make sure this is set in localStorage
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      oldPassword: "",
       password: "",
       confirmPassword: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Required"),
+      oldPassword: Yup.string().required("Old password is required"),
       password: Yup.string()
         .min(6, "Password must be at least 6 characters")
-        .matches(/[A-Za-z]/, "Password must contain at least one letter")
-        .matches(/[0-9]/, "Password must contain at least one number")
-        .matches(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character")
-        .required("Required"),
+        .matches(/[A-Za-z]/, "Must contain at least one letter")
+        .matches(/[0-9]/, "Must contain at least one number")
+        .matches(/[!@#$%^&*(),.?":{}|<>]/, "Must contain a special character")
+        .required("New password is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
-        .required("Required"),
+        .required("Confirm your new password"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        await axios.post(
-          "http://localhost:5001/api/admin/change-password",
+        const response = await axios.patch(
+          `https://jointogain.ap-1.evennode.com/api/admin/editAdminPassword/${adminId}`,
           {
-            email: values.email,
-            password: values.password,
+            oldPassword: values.oldPassword,
+            newPassword: values.password,
           },
           {
             headers: {
@@ -62,10 +56,11 @@ function ChangePasswordForm() {
             },
           }
         );
+
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Password changed successfully!",
+          text: response.data.message || "Password updated successfully!",
         });
       } catch (error) {
         Swal.fire({
@@ -88,23 +83,32 @@ function ChangePasswordForm() {
           <form onSubmit={formik.handleSubmit}>
             <TextField
               fullWidth
-              label="Email ID"
-              name="email"
-              type="email"
-              value={formik.values.email}
+              label="Old Password"
+              name="oldPassword"
+              type={showOldPassword ? "text" : "password"}
+              value={formik.values.oldPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               margin="normal"
               variant="outlined"
-              error={formik.touched.email && Boolean(formik.errors.email)}
-              helperText={formik.touched.email && formik.errors.email}
+              error={formik.touched.oldPassword && Boolean(formik.errors.oldPassword)}
+              helperText={formik.touched.oldPassword && formik.errors.oldPassword}
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                      {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
               label="New Password"
               name="password"
-              type={showPassword ? "text" : "password"}
+              type={showNewPassword ? "text" : "password"}
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -116,8 +120,8 @@ function ChangePasswordForm() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={togglePasswordVisibility} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -139,7 +143,7 @@ function ChangePasswordForm() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={toggleConfirmPasswordVisibility} edge="end">
+                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                       {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>

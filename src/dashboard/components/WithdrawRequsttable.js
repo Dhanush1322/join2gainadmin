@@ -14,7 +14,7 @@ const WithdrawRequestTable = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://jointogain.ap-1.evennode.com/api/user/getUsers");
+      const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
       const formattedData = response.data.data.flatMap((user) =>
         user.investment_info?.flatMap((investment) => {
           // Count Approved Payouts
@@ -28,6 +28,7 @@ const WithdrawRequestTable = () => {
                 userID: user.user_profile_id,
                 name: user.name,
                 id: user._id,
+               
                 availableCredit: (investment.capital_amount || 0) + (investment.profit_amount || 0),
                 amountReq: investment.net_amount_per_month || 0,
                 tds: investment.tds_deduction_amount || 0,
@@ -40,7 +41,7 @@ const WithdrawRequestTable = () => {
                 remainingmonth: remainingMonths,  // <-- Updated calculation
                 date: investment.invest_confirm_date ? new Date(investment.invest_confirm_date).toLocaleDateString() : "N/A",
                 payoutDate: new Date(investment.roi_payout_status.find((p) => p.status === "Pending").payout_date).toLocaleDateString(),
-                bankImage: user.bankImage,
+                bankImage:  user.uploaded_bank_passbook_file,
               }]
             : [];
         })
@@ -67,7 +68,7 @@ const WithdrawRequestTable = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axios.post("http://jointogain.ap-1.evennode.com/api/admin/withdrowApprovedRejected", {
+          const response = await axios.post("https://jointogain.ap-1.evennode.com/api/admin/withdrowApprovedRejected", {
             userId: id,
             investmentId: investmentid,
             status: "Approved",
@@ -92,11 +93,12 @@ const WithdrawRequestTable = () => {
   const currentRecords = withdrawData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(withdrawData.length / recordsPerPage);
 
-  const handleOpen = (image) => {
-    setSelectedImage(image);
+  const handleOpen = (imageName) => {
+    const imageUrl = `https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile/${imageName}`;
+    setSelectedImage(imageUrl);
     setOpen(true);
   };
-
+  
   return (
     <Paper sx={{ padding: 2, margin: 2 }}>
       <h3>Withdraw Request List</h3>
