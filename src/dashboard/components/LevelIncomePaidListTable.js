@@ -1,15 +1,19 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, Typography, TablePagination, Chip, Button, CircularProgress, Box
+  TableRow, Paper, Typography, TablePagination, Chip, Button,
+  CircularProgress, Box, TextField
 } from '@mui/material';
+import { saveAs } from 'file-saver';
 
 const LevelIncomePaidListTable = () => {
   const [referralPayouts, setReferralPayouts] = useState([]);
+  const [filteredPayouts, setFilteredPayouts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -27,9 +31,9 @@ const LevelIncomePaidListTable = () => {
         for (const user of data.data) {
           if (!user.referral_payouts) continue;
 
-          const pendingPayouts = user.referral_payouts.filter(p => p.status === "Approved");
+          const approvedPayouts = user.referral_payouts.filter(p => p.status === "Approved");
 
-          pendingPayouts.forEach(payout => {
+          approvedPayouts.forEach(payout => {
             payoutsToFetch.push({
               user_id: user._id,
               investment_id: payout.investment_id,
@@ -54,7 +58,6 @@ const LevelIncomePaidListTable = () => {
                 amount: result.amount || base.amount,
                 userId: user_id,
                 userName,
-                referrals: base.referrals,
               };
             } catch (err) {
               console.error("Error fetching payout amount:", err);
@@ -63,10 +66,9 @@ const LevelIncomePaidListTable = () => {
           })
         );
 
-        // Filter out entries with amount 0
         const nonZeroPayouts = enrichedPayouts.filter(p => p.amount > 0);
-
         setReferralPayouts(nonZeroPayouts);
+        setFilteredPayouts(nonZeroPayouts);
       } catch (error) {
         console.error("Failed to fetch payouts:", error);
       } finally {
@@ -77,19 +79,63 @@ const LevelIncomePaidListTable = () => {
     fetchAllData();
   }, []);
 
-  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleFilter = () => {
+    if (!fromDate || !toDate) {
+      setFilteredPayouts(referralPayouts);
+      return;
+    }
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    to.setHours(23, 59, 59, 999); // include full day
+
+    const filtered = referralPayouts.filter(p => {
+      const payoutDate = new Date(p.payout_date);
+      return payoutDate >= from && payoutDate <= to;
+    });
+
+    setFilteredPayouts(filtered);
     setPage(0);
   };
 
- 
+  const handleExportCSV = () => {
+    const csvRows = [
+      ['User Name', 'Payout Date', 'Amount', 'Status'],
+      ...filteredPayouts.map(p =>
+        [p.userName, new Date(p.payout_date).toLocaleDateString(), p.amount, p.status]
+      )
+    ];
+
+    const csvContent = csvRows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'LevelIncomePayouts.csv');
+  };
+
   return (
     <div style={{ padding: 16 }}>
       <Typography variant="h5" gutterBottom>
         All Users – Level Income Payouts
       </Typography>
+
+      {/* Filter Section */}
+      <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
+        <TextField
+          label="From Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+        />
+        <TextField
+          label="To Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+        />
+        <Button variant="contained" onClick={handleFilter}>Filter</Button>
+        <Button variant="outlined" onClick={handleExportCSV}>Export CSV</Button>
+      </Box>
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -105,38 +151,35 @@ const LevelIncomePaidListTable = () => {
                 <TableCell><strong>Payout Date</strong></TableCell>
                 <TableCell><strong>Amount</strong></TableCell>
                 <TableCell><strong>Status</strong></TableCell>
-              
               </TableRow>
             </TableHead>
             <TableBody>
-              {referralPayouts
+              {filteredPayouts
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((payout, index) => {
-                  const payoutId = payout._id;
-
-                  return (
-                    <TableRow key={payoutId || index}>
-                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                      <TableCell>{payout.userName || "N/A"}</TableCell>
-                      <TableCell>{new Date(payout.payout_date).toLocaleDateString()}</TableCell>
-                      <TableCell>₹ {payout.amount}</TableCell>
-                      <TableCell>
-                        <Chip label="Approved" color="warning" variant="outlined" />
-                      </TableCell>
-                     
-                    </TableRow>
-                  );
-                })}
+                .map((payout, index) => (
+                  <TableRow key={payout._id || index}>
+                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>{payout.userName || "N/A"}</TableCell>
+                    <TableCell>{new Date(payout.payout_date).toLocaleDateString()}</TableCell>
+                    <TableCell>₹ {payout.amount}</TableCell>
+                    <TableCell>
+                      <Chip label="Approved" color="warning" variant="outlined" />
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
 
           <TablePagination
             component="div"
-            count={referralPayouts.length}
+            count={filteredPayouts.length}
             page={page}
-            onPageChange={handleChangePage}
+            onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
             rowsPerPageOptions={[5, 10, 25]}
           />
         </TableContainer>

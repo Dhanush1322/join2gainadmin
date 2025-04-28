@@ -1,13 +1,15 @@
+
 import React, { useState } from "react";
 import { Container, Box, Typography, Button } from "@mui/material";
 import Swal from "sweetalert2";
-
-function KycForm() {
+import { useNavigate } from "react-router-dom";
+function AddKycForm() {
+  const navigate = useNavigate();
   const [panFile, setPanFile] = useState(null);
   const [bankPassFile, setBankPassFile] = useState(null);
   const [aadhaarFile, setAadhaarFile] = useState(null);
 
-  const userId = localStorage.getItem("_id");
+  const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("accessToken");
 
   const handleFileChange = (e, setFile) => {
@@ -39,12 +41,8 @@ function KycForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!userId || !token) {
-      Swal.fire({ title: "Error", text: "User not authenticated", icon: "error" });
-      return;
-    }
-
+  
+  
     if (!panFile || !bankPassFile || !aadhaarFile) {
       Swal.fire({
         icon: "warning",
@@ -53,20 +51,27 @@ function KycForm() {
       });
       return;
     }
-
+  
     await Promise.all([
       uploadFile(panFile, `https://jointogain.ap-1.evennode.com/api/user/addPanCardFile/${userId}`),
       uploadFile(aadhaarFile, `https://jointogain.ap-1.evennode.com/api/user/addAadharCardFile/${userId}`),
       uploadFile(bankPassFile, `https://jointogain.ap-1.evennode.com/api/user/addBankPassbookFile/${userId}`),
     ]);
-
+  
     setPanFile(null);
     setBankPassFile(null);
     setAadhaarFile(null);
-
-    Swal.fire({ title: "Success!", text: "Files uploaded successfully!", icon: "success" });
+  
+    Swal.fire({
+      title: "Success!",
+      text: "Files uploaded successfully!",
+      icon: "success",
+      confirmButtonText: "Continue",
+    }).then(() => {
+      navigate("/addtopup");
+    });
   };
-
+  
   return (
     <Container maxWidth="sm">
       <Box sx={{ p: 4, boxShadow: 2, borderRadius: 2, bgcolor: "#fff" }}>
@@ -122,4 +127,4 @@ function KycForm() {
   );
 }
 
-export default KycForm;
+export default AddKycForm;

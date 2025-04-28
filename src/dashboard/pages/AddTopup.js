@@ -4,11 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import './DashboardPage.css';
-
-
-import AddUserForm from '../components/AddUserForm';
-
-function AddUser() {
+import AddTopupForm from '../components/AddTopupForm';
+function AddTopup() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
@@ -42,11 +39,11 @@ function AddUser() {
       <div className="dashboard-content">
         <Navbar toggleSidebar={toggleSidebar} />
         <div style={{ marginTop: '100px', marginLeft }}>
-          <AddUserForm />
+          <AddTopupForm />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default AddUser;
+export default AddTopup

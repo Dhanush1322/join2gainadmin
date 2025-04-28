@@ -29,7 +29,20 @@ const LevelIncomeListTable = () => {
         for (const user of data.data) {
           if (!user.referral_payouts) continue;
 
-          const pendingPayouts = user.referral_payouts.filter(p => p.status === "Pending");
+          const today = new Date();
+         // strip time / const today = new Date("2027-01-21");
+          today.setHours(0, 0, 0, 0); // strip time
+          
+          const pendingPayouts = user.referral_payouts.filter(p => {
+            if (p.status !== "Pending") return false;
+            
+            const payoutDate = new Date(p.payout_date);
+            payoutDate.setHours(0, 0, 0, 0); // strip time from payout date too
+          
+            return payoutDate <= today;
+          });
+          
+          
 
           pendingPayouts.forEach(payout => {
             payoutsToFetch.push({

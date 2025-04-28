@@ -21,6 +21,9 @@ import ViewAllDownline from "./dashboard/pages/ViewAllDownline";
 import LevelInclomeList from "./dashboard/pages/LevelInclomeList";
 import LevelIncomePaidList from "./dashboard/pages/LevelIncomePaidList";
 import AddUser from "./dashboard/pages/AddUser";
+import AddKyc from "./dashboard/pages/AddKyc";
+import AddTopup from "./dashboard/pages/AddTopup";
+
 const App = () => {
   return (
     <div className="app-container">
@@ -37,6 +40,7 @@ const App = () => {
           <Route path="/AwardAchivers" element={<AwardAchivers />} />
           <Route path="/InvestmentRequst" element={<InvestmentRequst />} />
           <Route path="/InvestmentHistory" element={<InvestmentHistory />} />
+          <Route path="/InvestmentHistory" element={<InvestmentHistory />} />
           <Route path="/KycApproved" element={<KycApproved />} />
           <Route path="/KycHistory" element={<KycHistory />} />
           <Route path="/WithdrawRequst" element={<WithdrawRequst />} />
@@ -46,6 +50,8 @@ const App = () => {
           <Route path="/ViewAllDownline/:id" element={<ViewAllDownline />} />
           <Route path="/LevelInclomeList" element={<LevelInclomeList />} />
           <Route path="/LevelIncomePaidList" element={<LevelIncomePaidList />} />
+          <Route path="/AddKyc" element={<AddKyc />} />
+          <Route path="/AddTopup" element={<AddTopup />} />
         </Routes>
        
       </Router>

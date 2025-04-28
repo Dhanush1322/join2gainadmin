@@ -68,6 +68,7 @@ function ViewMembersForm() {
               <TableCell>ID</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Mobile</TableCell>
+
               <TableCell>Plan</TableCell>
               <TableCell>Total Investment</TableCell>
               <TableCell>Join Date</TableCell>

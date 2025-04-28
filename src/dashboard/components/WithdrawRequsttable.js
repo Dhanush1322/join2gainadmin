@@ -15,37 +15,44 @@ const WithdrawRequestTable = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
+  
+      const today = new Date().toLocaleDateString();
+     // const today = new Date("2025-05-20").toLocaleDateString();
+  
       const formattedData = response.data.data.flatMap((user) =>
         user.investment_info?.flatMap((investment) => {
-          // Count Approved Payouts
-          const approvedPayoutsCount = investment.roi_payout_status?.filter(payout => payout.status === "Approved").length || 0;
+          const pendingPayout = investment.roi_payout_status?.find((payout) => payout.status === "Pending");
   
-          // Calculate Remaining Months
+          if (!pendingPayout) return [];
+  
+          const payoutDate = new Date(pendingPayout.payout_date).toLocaleDateString();
+  
+          if (payoutDate !== today) return [];
+  
+          const approvedPayoutsCount = investment.roi_payout_status?.filter(payout => payout.status === "Approved").length || 0;
           const remainingMonths = (investment.invest_duration_in_month || 0) - approvedPayoutsCount;
   
-          return investment.roi_payout_status?.some((payout) => payout.status === "Pending")
-            ? [{
-                userID: user.user_profile_id,
-                name: user.name,
-                id: user._id,
-               
-                availableCredit: (investment.capital_amount || 0) + (investment.profit_amount || 0),
-                amountReq: investment.net_amount_per_month || 0,
-                tds: investment.tds_deduction_amount || 0,
-                sc: investment.sc_deduction_amount || 0,
-                investmentid: investment._id || 0,
-                investedamount: investment.invest_amount || 0,
-                invest_type: investment.invest_type || 0,
-                netPay: investment.net_amount_per_month || 0,
-                invest_duration_in_month: investment.invest_duration_in_month || 0,
-                remainingmonth: remainingMonths,  // <-- Updated calculation
-                date: investment.invest_confirm_date ? new Date(investment.invest_confirm_date).toLocaleDateString() : "N/A",
-                payoutDate: new Date(investment.roi_payout_status.find((p) => p.status === "Pending").payout_date).toLocaleDateString(),
-                bankImage:  user.uploaded_bank_passbook_file,
-              }]
-            : [];
+          return [{
+            userID: user.user_profile_id,
+            name: user.name,
+            id: user._id,
+            availableCredit: (investment.capital_amount || 0) + (investment.profit_amount || 0),
+            amountReq: investment.net_amount_per_month || 0,
+            tds: investment.tds_deduction_amount || 0,
+            sc: investment.sc_deduction_amount || 0,
+            investmentid: investment._id || 0,
+            investedamount: investment.invest_amount || 0,
+            invest_type: investment.invest_type || 0,
+            netPay: investment.net_amount_per_month || 0,
+            invest_duration_in_month: investment.invest_duration_in_month || 0,
+            remainingmonth: remainingMonths,
+            date: investment.invest_confirm_date ? new Date(investment.invest_confirm_date).toLocaleDateString() : "N/A",
+            payoutDate,
+            bankImage: user.uploaded_bank_passbook_file,
+          }];
         })
       );
+  
       setWithdrawData(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error);

@@ -19,8 +19,10 @@ import {
 import axios from "axios";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 function AddUserForm() {
+  const navigate = useNavigate();
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Required"),
     gender: Yup.string().required("Required"),
@@ -57,45 +59,50 @@ function AddUserForm() {
     },
     validationSchema,
     onSubmit: async (values) => {
-        const payload = { ...values };
-        delete payload.agree; // remove checkbox from final payload
-      
-        try {
-          const response = await axios.post(
-            "https://jointogain.ap-1.evennode.com/api/admin/addUser",
-            payload,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-      
-          // Assuming response.data contains user_profile_id and password
-          const { user_profile_id, password } = response.data.data;
-      
-          Swal.fire({
-            icon: "success",
-            title: "User Added Successfully!",
-            html: `
+      const payload = { ...values };
+      delete payload.agree; // remove checkbox from final payload
+    
+      try {
+        const response = await axios.post(
+          "https://jointogain.ap-1.evennode.com/api/admin/addUser",
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+    
+        const { user_profile_id, password, _id } = response.data.data;
+    
+        // ✅ Store the _id in localStorage
+        localStorage.setItem("userId", _id);
+    
+        Swal.fire({
+          icon: "success",
+          title: "User Added Successfully!",
+          html: `
             <strong>User ID:</strong> ${user_profile_id}<br/>
             <strong>Password:</strong> ${password}<br/><br/>
             <span style="color: red;"><b>Please take a screenshot of this information for your records.</b></span>
           `,
-            confirmButtonText: "OK"
-          });
-      
-          formik.resetForm();
-        } catch (error) {
-          console.error("Error adding user:", error);
-      
-          const message =
-            error.response?.data?.message || "Failed to add user. Please try again.";
-      
-          Swal.fire("Failed", message, "error");
-        }
+          confirmButtonText: "OK"
+        }).then(() => {
+          // ✅ Redirect to AddKyc page
+          navigate("/addkyc");
+        });
+        
+        formik.resetForm();
+      } catch (error) {
+        console.error("Error adding user:", error);
+    
+        const message =
+          error.response?.data?.message || "Failed to add user. Please try again.";
+    
+        Swal.fire("Failed", message, "error");
       }
-       });
+    }
+        });
 
   return (
     <Container maxWidth={false} disableGutters sx={{ mb: "30px", minHeight: "100vh" }}>
