@@ -99,9 +99,18 @@ const DashboardMain = () => {
       icon: <MonetizationOn fontSize="large" />,
       color: "#f5ee24"
     },
+    
     {
       title: "Total Investments",
       count: `Rs. ${totalInvestments.toLocaleString()}.00`,
+      icon: <AccountBalanceWallet fontSize="large" />,
+      color: "#f5ee24"
+    }
+    ,
+    {
+      title: "Rank",
+     
+      link: "/Rank",
       icon: <AccountBalanceWallet fontSize="large" />,
       color: "#f5ee24"
     }

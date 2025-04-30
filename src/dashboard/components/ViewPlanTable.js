@@ -38,6 +38,11 @@ function ViewPlanTable({ userId }) {
             const approvedPayouts = item.roi_payout_status.filter(payout => payout.status === 'Approved').length;
             const roiLeft = item.invest_duration_in_month - approvedPayouts;
 
+            // Get maturity date from the last payout_date in roi_payout_status
+            const maturityDate = item.roi_payout_status.length > 0
+              ? new Date(item.roi_payout_status[item.roi_payout_status.length - 1].payout_date).toLocaleDateString()
+              : 'N/A';
+
             return {
               sNo: index + 1,
               requestDate: new Date(item.invest_apply_date).toLocaleDateString(),
@@ -47,6 +52,7 @@ function ViewPlanTable({ userId }) {
               invest_duration_in_month: item.invest_duration_in_month,
               status: item.invest_confirm_date ? 'Active' : 'Pending',
               roiLeft: roiLeft,
+              maturityDate: maturityDate,
             };
           });
 
@@ -88,8 +94,9 @@ function ViewPlanTable({ userId }) {
               <TableCell>Invest Type</TableCell>
               <TableCell>Investment (Rs)</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Invest Duration </TableCell>
+              <TableCell>Invest Duration</TableCell>
               <TableCell>ROI Left</TableCell>
+              <TableCell>Maturity Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -114,6 +121,7 @@ function ViewPlanTable({ userId }) {
                 </TableCell>
                 <TableCell>{row.invest_duration_in_month}</TableCell>
                 <TableCell>{row.roiLeft}</TableCell>
+                <TableCell sx={{color:'red'}}>{row.maturityDate}</TableCell>
               </TableRow>
             ))}
           </TableBody>

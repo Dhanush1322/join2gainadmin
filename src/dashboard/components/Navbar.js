@@ -9,11 +9,7 @@ const Navbar = ({ toggleSidebar }) => {
         <FaBars />
       </div>
 
-      <div className="navbar-search">
-        <input type="text" placeholder="Search..." />
-        <FaSearch className="search-icon" />
-      </div>
-
+     
       <h3>Admin Dashboard</h3>
 
       <div className="navbar-profile">

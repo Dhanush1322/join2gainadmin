@@ -23,6 +23,7 @@ import LevelIncomePaidList from "./dashboard/pages/LevelIncomePaidList";
 import AddUser from "./dashboard/pages/AddUser";
 import AddKyc from "./dashboard/pages/AddKyc";
 import AddTopup from "./dashboard/pages/AddTopup";
+import Rank from "./dashboard/pages/Rank";
 
 const App = () => {
   return (
@@ -40,7 +41,7 @@ const App = () => {
           <Route path="/AwardAchivers" element={<AwardAchivers />} />
           <Route path="/InvestmentRequst" element={<InvestmentRequst />} />
           <Route path="/InvestmentHistory" element={<InvestmentHistory />} />
-          <Route path="/InvestmentHistory" element={<InvestmentHistory />} />
+         
           <Route path="/KycApproved" element={<KycApproved />} />
           <Route path="/KycHistory" element={<KycHistory />} />
           <Route path="/WithdrawRequst" element={<WithdrawRequst />} />
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="/LevelIncomePaidList" element={<LevelIncomePaidList />} />
           <Route path="/AddKyc" element={<AddKyc />} />
           <Route path="/AddTopup" element={<AddTopup />} />
+          <Route path="/Rank" element={<Rank />} />
         </Routes>
        
       </Router>

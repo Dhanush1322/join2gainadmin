@@ -32,95 +32,65 @@ function AddTopupForm() {
       setFormData({ ...formData, [name]: value });
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { selectPlan, amount, utrNo, proof, investDuration } = formData;
-
+  
     try {
-      const kycResponse = await fetch(
-        `https://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const userData = await kycResponse.json();
-
-      const user = userData?.data?.data;
-
-      if (!user) {
-        Swal.fire({
-          icon: "error",
-          title: "User Not Found",
-          text: "Unable to retrieve user information.",
-        });
-        return;
-      }
-
-      const {
-        uploaded_pan_file,
-        uploaded_aadher_file,
-        uploaded_bank_passbook_file,
-        kyc_status,
-      } = user;
-
-      if (
-        !uploaded_pan_file ||
-        !uploaded_aadher_file ||
-        !uploaded_bank_passbook_file
-      ) {
-        Swal.fire({
-          icon: "warning",
-          title: "KYC Incomplete",
-          text: "Please complete your KYC by uploading PAN, Aadhaar, and Bank Passbook.",
-        });
-        return;
-      }
-      
-
-      if (
-        selectPlan === "long term" &&
-        (!investDuration || isNaN(investDuration) || investDuration <= 0)
-      ) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Duration",
-          text: "Please enter a valid investment duration in months.",
-        });
-        return;
-      }
-
       const formDataToSend = new FormData();
       formDataToSend.append("invest_type", selectPlan);
       formDataToSend.append("utr_no", utrNo);
       formDataToSend.append("invest_amount", amount);
       formDataToSend.append("file", proof);
-
       if (selectPlan === "long term") {
+        if (!investDuration || isNaN(investDuration) || investDuration <= 0) {
+          Swal.fire({ icon: "error", title: "Invalid Duration" });
+          return;
+        }
         formDataToSend.append("invest_duration_in_month", investDuration);
       }
-
+  
       const response = await fetch(
         `https://jointogain.ap-1.evennode.com/api/user/addTopUp/${userId}`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           body: formDataToSend,
         }
       );
-
+  
       const responseBody = await response.json();
-
+  
       if (response.ok) {
+        // ✅ Auto-approve investment
+        const updatedUserRes = await fetch(
+          `https://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const updatedUserData = await updatedUserRes.json();
+        const updatedUser = updatedUserData?.data?.data;
+        const latestInvestment = updatedUser?.investment_info?.slice(-1)[0];
+  
+        if (latestInvestment && latestInvestment._id) {
+          await fetch(
+            `https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${latestInvestment._id}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ investment_status: "Approved" }),
+            }
+          );
+        }
+  
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Form submitted successfully!",
+          text: "Form submitted and approved successfully!",
         }).then(() => {
           setFormData({
             selectPlan: "",
@@ -129,15 +99,13 @@ function AddTopupForm() {
             proof: null,
             investDuration: "",
           });
-          navigate("/adduser"); // navigate here
+          navigate("/adduser");
         });
-      }
-      
-      else {
+      } else {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: responseBody.message || "An error occurred, please try again.",
+          text: responseBody.message || "An error occurred",
         });
       }
     } catch (error) {
@@ -145,11 +113,11 @@ function AddTopupForm() {
       Swal.fire({
         icon: "error",
         title: "Network Error",
-        text: "There was a network error. Please check your internet connection and try again.",
+        text: "Check your connection and try again.",
       });
     }
   };
-
+  
   return (
     <Container maxWidth="sm">
       <Box
@@ -162,7 +130,7 @@ function AddTopupForm() {
         }}
       >
         <Typography variant="h5" gutterBottom>
-          Re TopUp Form
+         My Investment
         </Typography>
         <form onSubmit={handleSubmit}>
           <Box sx={{ mb: 2 }}>

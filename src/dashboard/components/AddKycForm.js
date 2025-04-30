@@ -42,7 +42,6 @@ function AddKycForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-  
     if (!panFile || !bankPassFile || !aadhaarFile) {
       Swal.fire({
         icon: "warning",
@@ -52,24 +51,51 @@ function AddKycForm() {
       return;
     }
   
-    await Promise.all([
-      uploadFile(panFile, `https://jointogain.ap-1.evennode.com/api/user/addPanCardFile/${userId}`),
-      uploadFile(aadhaarFile, `https://jointogain.ap-1.evennode.com/api/user/addAadharCardFile/${userId}`),
-      uploadFile(bankPassFile, `https://jointogain.ap-1.evennode.com/api/user/addBankPassbookFile/${userId}`),
-    ]);
+    try {
+      await Promise.all([
+        uploadFile(panFile, `https://jointogain.ap-1.evennode.com/api/user/addPanCardFile/${userId}`),
+        uploadFile(aadhaarFile, `https://jointogain.ap-1.evennode.com/api/user/addAadharCardFile/${userId}`),
+        uploadFile(bankPassFile, `https://jointogain.ap-1.evennode.com/api/user/addBankPassbookFile/${userId}`),
+      ]);
   
-    setPanFile(null);
-    setBankPassFile(null);
-    setAadhaarFile(null);
+      // Automatically approve KYC
+      const approveResponse = await fetch(
+        `https://jointogain.ap-1.evennode.com/api/admin/kycApprovedRejected/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ kyc_status: "Approved" }),
+        }
+      );
   
-    Swal.fire({
-      title: "Success!",
-      text: "Files uploaded successfully!",
-      icon: "success",
-      confirmButtonText: "Continue",
-    }).then(() => {
-      navigate("/addtopup");
-    });
+      if (!approveResponse.ok) {
+        throw new Error("KYC approval failed");
+      }
+  
+      setPanFile(null);
+      setBankPassFile(null);
+      setAadhaarFile(null);
+  
+      Swal.fire({
+        title: "Success!",
+        text: "Files uploaded and KYC Approved!",
+        icon: "success",
+        confirmButtonText: "Continue",
+      }).then(() => {
+        navigate("/addtopup");
+      });
+  
+    } catch (error) {
+      console.error("Error during submission:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Submission Failed",
+        text: error.message,
+      });
+    }
   };
   
   return (

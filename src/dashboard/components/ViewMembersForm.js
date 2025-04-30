@@ -11,43 +11,60 @@ import {
   Button,
   Typography,
 } from "@mui/material";
+import Swal from 'sweetalert2';
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 function ViewMembersForm() {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalInvestment, setTotalInvestment] = useState(0);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   // Fetch user data from API
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
-        if (response.data.Status) {
-          const usersData = response.data.data;
-          setUsers(usersData);
-
-          // Calculate total investment amount across all users
-          const total = usersData.reduce((sum, user) => {
-            const userInvestmentTotal = user.investment_info
-              ? user.investment_info.reduce((acc, inv) => acc + (inv.invest_amount || 0), 0)
-              : 0;
-            return sum + userInvestmentTotal;
-          }, 0);
-
-          setTotalInvestment(total);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
     fetchUsers();
   }, []);
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
+      if (response.data.Status) {
+        setUsers(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you really want to delete this record?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(`https://jointogain.ap-1.evennode.com/api/user/deleteMember/${userId}`);
+        if (response.data.Status) {
+          setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+          Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+        } else {
+          Swal.fire('Failed!', 'Failed to delete the user.', 'error');
+        }
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        Swal.fire('Error!', 'Something went wrong.', 'error');
+      }
+    }
+  };
+  
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -68,12 +85,12 @@ function ViewMembersForm() {
               <TableCell>ID</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Mobile</TableCell>
-
               <TableCell>Plan</TableCell>
               <TableCell>Total Investment</TableCell>
               <TableCell>Join Date</TableCell>
               <TableCell>Profile</TableCell>
               <TableCell>Downline</TableCell>
+              <TableCell>Delete</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -83,17 +100,16 @@ function ViewMembersForm() {
                 : 0;
 
               return (
-                <TableRow key={index}>
+                <TableRow key={row._id}>
                   <TableCell>{row.user_profile_id}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.phone_no}</TableCell>
-                  
                   <TableCell>
                     <Button 
                       variant="contained" 
                       color="primary" 
                       size="small"
-                      onClick={() => navigate(`/ViewPlan/${row._id}`)} // Navigate to /ViewPlan with _id
+                      onClick={() => navigate(`/ViewPlan/${row._id}`)}
                     >
                       View
                     </Button>
@@ -102,25 +118,34 @@ function ViewMembersForm() {
                   <TableCell>
                     {new Date(row.createdAt).toLocaleDateString("en-GB")}
                   </TableCell>
-
                   <TableCell>
                     <Button 
                       variant="contained" 
                       color="primary" 
                       size="small"
-                      onClick={() => navigate(`/VieAllProfile/${row._id}`)} // Navigate to /ViewPlan with _id
+                      onClick={() => navigate(`/VieAllProfile/${row._id}`)}
                     >
                       View
                     </Button>
                   </TableCell>
                   <TableCell>
                     <Button 
-                    variant="contained"
-                     color="secondary" 
-                     size="small"
-                     onClick={() => navigate(`/ViewAllDownline/${row._id}`)} 
-                     >
+                      variant="contained"
+                      color="secondary" 
+                      size="small"
+                      onClick={() => navigate(`/ViewAllDownline/${row._id}`)} 
+                    >
                       View
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="contained"
+                      color="error" 
+                      size="small"
+                      onClick={() => handleDelete(row._id)}
+                    >
+                      Delete
                     </Button>
                   </TableCell>
                 </TableRow>
