@@ -38,6 +38,7 @@ function InvestmentRequestTable() {
             uploaded_proof_file: invest.uploaded_proof_file,
             id: invest._id,
             investment_status: invest.investment_status || " ",
+            name: user.name, // 👈 attach the name from parent user object
           })) || []
         );
 
@@ -114,9 +115,11 @@ function InvestmentRequestTable() {
           <TableHead>
             <TableRow>
               <TableCell>SNo</TableCell>
+              <TableCell>Name</TableCell>
               <TableCell>Investment Type</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>UTR No.</TableCell>
+             
               <TableCell>Proof</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Action</TableCell>
@@ -126,9 +129,11 @@ function InvestmentRequestTable() {
             {currentRecords.map((record, index) => (
               <TableRow key={record.id || index}>
                 <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                <TableCell>{record.name}</TableCell>
                 <TableCell>{record.invest_type}</TableCell>
                 <TableCell>₹{record.invest_amount.toLocaleString()}</TableCell>
                 <TableCell>{record.utr_no}</TableCell>
+              
                 <TableCell>
                   {record.uploaded_proof_file ? (
                     <a
