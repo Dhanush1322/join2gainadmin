@@ -38,6 +38,7 @@ function ViewMembersForm() {
       const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
       if (response.data.Status) {
         setUsers(response.data.data);
+        console.log("Users fetched successfully:", response.data.data);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -133,6 +134,8 @@ function ViewMembersForm() {
               <TableCell>ID</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Mobile</TableCell>
+              <TableCell>Userid</TableCell>
+              <TableCell>Password</TableCell>
               <TableCell>Plan</TableCell>
               <TableCell>Total Investment</TableCell>
               <TableCell>Join Date</TableCell>
@@ -152,6 +155,9 @@ function ViewMembersForm() {
                   <TableCell>{row.user_profile_id}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.phone_no}</TableCell>
+                    <TableCell>{row.user_profile_id}</TableCell>
+                  <TableCell>{row.password}</TableCell>
+                
                   <TableCell>
                     <Button variant="contained" size="small" onClick={() => navigate(`/ViewPlan/${row._id}`)}>
                       View
