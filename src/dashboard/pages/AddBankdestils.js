@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import './DashboardPage.css';
-import AwardAchiversTable from '../components/AwardAchiversTable';
-
-function AwardAchivers() {
+import AddBankDestilsForm from '../components/AddBankDestilsForm';
+function AddBankDestils() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ function AwardAchivers() {
   }, []);
 
   // Compute marginLeft based on window width
-  const marginLeft = windowWidth <= 768 ? '4px' : '260px';
+  const marginLeft = windowWidth <= 768 ? '4px' : '0px';
 
   return (
     <div className="dashboard">
@@ -39,11 +39,11 @@ function AwardAchivers() {
       <div className="dashboard-content">
         <Navbar toggleSidebar={toggleSidebar} />
         <div style={{ marginTop: '100px', marginLeft }}>
-          <AwardAchiversTable />
+          <AddBankDestilsForm />
         </div>
       </div>
     </div>
   )
 }
 
-export default AwardAchivers
+export default AddBankDestils

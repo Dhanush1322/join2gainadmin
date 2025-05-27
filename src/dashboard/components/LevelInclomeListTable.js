@@ -26,25 +26,35 @@ const LevelIncomeListTable = () => {
 
         const payoutsToFetch = [];
 
+        // const today = new Date();
+        const today = new Date("2025-07-02"); // YYYY-MM-DD format
+        today.setHours(0, 0, 0, 0); // strip time
         for (const user of data.data) {
           if (!user.referral_payouts) continue;
 
-          const today = new Date();
-         // strip time / const today = new Date("2027-01-21");
-          today.setHours(0, 0, 0, 0); // strip time
-          
           const pendingPayouts = user.referral_payouts.filter(p => {
             if (p.status !== "Pending") return false;
-            
             const payoutDate = new Date(p.payout_date);
-            payoutDate.setHours(0, 0, 0, 0); // strip time from payout date too
-          
+            payoutDate.setHours(0, 0, 0, 0);
             return payoutDate <= today;
           });
-          
-          
 
           pendingPayouts.forEach(payout => {
+            let fromUserName = "N/A";
+
+            // Find matching referral and investment from user's referral data
+            if (Array.isArray(user.referrals)) {
+              for (const referral of user.referrals) {
+                if (Array.isArray(referral.investment_info)) {
+                  const match = referral.investment_info.find(info => info._id === payout.investment_id);
+                  if (match) {
+                    fromUserName = referral.name || "N/A";
+                    break;
+                  }
+                }
+              }
+            }
+
             payoutsToFetch.push({
               user_id: user._id,
               bank: user.uploaded_bank_passbook_file,
@@ -52,13 +62,14 @@ const LevelIncomeListTable = () => {
               referral_payout_id: payout._id,
               base: payout,
               userName: user.name,
+              fromUserName: fromUserName,
               bankImage: user.uploaded_bank_passbook_file
             });
           });
         }
 
         const enrichedPayouts = await Promise.all(
-          payoutsToFetch.map(async ({ user_id, investment_id, referral_payout_id, base, userName, bankImage }) => {
+          payoutsToFetch.map(async ({ user_id, investment_id, referral_payout_id, base, userName, fromUserName, bankImage }) => {
             try {
               const res = await fetch("https://jointogain.ap-1.evennode.com/api/user/getReferralPayoutAmountOfInvestment", {
                 method: "POST",
@@ -71,13 +82,21 @@ const LevelIncomeListTable = () => {
                 amount: result.amount || base.amount,
                 userId: user_id,
                 userName,
+                fromUserName,
                 referrals: base.referrals,
                 bankImage,
                 investment_id,
               };
             } catch (err) {
               console.error("Error fetching payout amount:", err);
-              return { ...base, userId: user_id, userName, bankImage, investment_id };
+              return {
+                ...base,
+                userId: user_id,
+                userName,
+                fromUserName,
+                bankImage,
+                investment_id,
+              };
             }
           })
         );
@@ -154,6 +173,7 @@ const LevelIncomeListTable = () => {
               <TableRow>
                 <TableCell><strong>S.N</strong></TableCell>
                 <TableCell><strong>User Name</strong></TableCell>
+                <TableCell><strong>From User Name</strong></TableCell>
                 <TableCell><strong>Payout Date</strong></TableCell>
                 <TableCell><strong>Amount</strong></TableCell>
                 <TableCell><strong>Status</strong></TableCell>
@@ -168,6 +188,7 @@ const LevelIncomeListTable = () => {
                   <TableRow key={payout._id || index}>
                     <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{payout.userName || "N/A"}</TableCell>
+                    <TableCell>{payout.fromUserName || "N/A"}</TableCell>
                     <TableCell>{new Date(payout.payout_date).toLocaleDateString()}</TableCell>
                     <TableCell>₹ {payout.amount}</TableCell>
                     <TableCell>

@@ -1,61 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-  Typography,
-  Box,
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, TablePagination,
+  Typography, Box,
 } from '@mui/material';
 
 function ViewAllDownlineTable({ userId }) {
-  const [data, setData] = useState([]); // Holds the referral data
-  const [selectedUser, setSelectedUser] = useState(null); // Stores the clicked user
+  const [data, setData] = useState([]);
+  const [topUser, setTopUser] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const fetchDownlineData = async (id) => {
+    try {
+      const response = await fetch(`https://jointogain.ap-1.evennode.com/api/user/getUser/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
+      const result = await response.json();
+      const rootUser = result?.data?.data;
+      setTopUser(rootUser);
 
-  // Fetch referral data from API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`https://jointogain.ap-1.evennode.com/api/user/getUser/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-           
-          },
-        });
+      const flattenReferrals = (referrals, level = 1) => {
+        let flattened = [];
 
-        const result = await response.json();
-        console.log(result); // Log the response to check the structure of the data
+        for (const referral of referrals) {
+          referral.user_level = level;
+          flattened.push(referral);
 
-        // Check if the result and the referrals field exist
-        if (result?.data?.data?.referrals) {
-          setData(result.data.data.referrals);
-        } else {
-          console.error('Referrals not found in the response data');
-          setData([]);
+          if (referral.referrals?.length > 0) {
+            flattened = flattened.concat(flattenReferrals(referral.referrals, level + 1));
+          }
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+
+        return flattened;
+      };
+
+      if (rootUser?.referrals?.length > 0) {
+        const flattenedData = flattenReferrals(rootUser.referrals);
+        setData(flattenedData);
+      } else {
         setData([]);
       }
-    };
-
-    if (userId) {
-      fetchData();
+    } catch (error) {
+      console.error('Error fetching downline:', error);
+      setData([]);
     }
-  }, [userId]); // Fetch data whenever the userId prop changes
+  };
 
-  // Handle row click to show details of the clicked user's referrals
+  useEffect(() => {
+    if (userId) {
+      fetchDownlineData(userId);
+    }
+  }, [userId]);
+
   const handleRowClick = (user) => {
-    setSelectedUser(user);
+    // When user is clicked, fetch their downline as new top-level user
+    fetchDownlineData(user._id);
+    setPage(0);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -71,7 +76,7 @@ function ViewAllDownlineTable({ userId }) {
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <Box mb={2}>
         <Typography variant="h6" component="div">
-          {selectedUser ? `Referrals of ${selectedUser.name}` : 'Downline Members'}
+          {topUser ? `Referrals of ${topUser.name}` : 'Downline Members'}
         </Typography>
       </Box>
       <TableContainer>
@@ -84,7 +89,7 @@ function ViewAllDownlineTable({ userId }) {
               <TableCell>Name</TableCell>
               <TableCell>Investment (Rs)</TableCell>
               <TableCell>Join Date</TableCell>
-              <TableCell>Activation Date</TableCell>
+              <TableCell>Activation Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -95,22 +100,24 @@ function ViewAllDownlineTable({ userId }) {
             ) : (
               data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => (
-                  <React.Fragment key={row._id}>
-                    {/* Main Row */}
-                    <TableRow
-                      hover
-                      onClick={() => handleRowClick(row)} // Click event to load referrals
-                      style={{ cursor: "pointer", background: selectedUser?._id === row._id ? "#f0f8ff" : "inherit" }}
-                    >
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{row.user_profile_id}</TableCell>
-                      <TableCell>{row.user_level || 'N/A'}</TableCell>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.investment_info.length > 0 ? row.investment_info[0].invest_amount.toLocaleString() : 'N/A'}</TableCell>
-                      <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>{row.user_status === 'Inactive' ? 'Inactive' : 'Active'}</TableCell>
-                    </TableRow>
-                  </React.Fragment>
+                  <TableRow
+                    hover
+                    key={row._id}
+                    onClick={() => handleRowClick(row)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <TableCell>{index + 1 + page * rowsPerPage}</TableCell>
+                    <TableCell>{row.user_profile_id}</TableCell>
+                    <TableCell>{row.user_level}</TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>
+                      {row.investment_info?.length > 0
+                        ? row.investment_info.reduce((sum, inv) => sum + (inv.invest_amount || 0), 0).toLocaleString('en-IN')
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>{row.user_status === 'Inactive' ? 'Inactive' : 'Active'}</TableCell>
+                  </TableRow>
                 ))
             )}
           </TableBody>

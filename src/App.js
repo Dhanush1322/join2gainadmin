@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
 import "./App.css";
 import DashboardPage from "./dashboard/pages/DashboardPage";
 import AdminLogin from "./dashboard/adminlogin/AdminLogin";
@@ -24,24 +23,23 @@ import AddUser from "./dashboard/pages/AddUser";
 import AddKyc from "./dashboard/pages/AddKyc";
 import AddTopup from "./dashboard/pages/AddTopup";
 import Rank from "./dashboard/pages/Rank";
-
+import AddBankDestils from "./dashboard/pages/AddBankdestils";
 const App = () => {
   return (
     <div className="app-container">
       <Router>
-        
+
         <Routes>
-        <Route path="/" element={<AdminLogin />} />
+          <Route path="/" element={<AdminLogin />} />
           <Route path="/Dashboard" element={<DashboardPage />} />
           <Route path="/AddUser" element={<AddUser />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/ViewMembers" element={<ViewMembers />} />
-          <Route path="/ViewPlan/:id"  element={<ViewPlan />} />
+          <Route path="/ViewPlan/:id" element={<ViewPlan />} />
           <Route path="/DeactivatedMember" element={<DeactivatedMember />} />
           <Route path="/AwardAchivers" element={<AwardAchivers />} />
           <Route path="/InvestmentRequst" element={<InvestmentRequst />} />
           <Route path="/InvestmentHistory" element={<InvestmentHistory />} />
-         
           <Route path="/KycApproved" element={<KycApproved />} />
           <Route path="/KycHistory" element={<KycHistory />} />
           <Route path="/WithdrawRequst" element={<WithdrawRequst />} />
@@ -51,11 +49,12 @@ const App = () => {
           <Route path="/ViewAllDownline/:id" element={<ViewAllDownline />} />
           <Route path="/LevelInclomeList" element={<LevelInclomeList />} />
           <Route path="/LevelIncomePaidList" element={<LevelIncomePaidList />} />
+          <Route path="/AddBankDestils" element={<AddBankDestils />} />
           <Route path="/AddKyc" element={<AddKyc />} />
           <Route path="/AddTopup" element={<AddTopup />} />
           <Route path="/Rank" element={<Rank />} />
         </Routes>
-       
+
       </Router>
     </div>
   );

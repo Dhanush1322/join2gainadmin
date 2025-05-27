@@ -85,7 +85,7 @@ function AddKycForm() {
         icon: "success",
         confirmButtonText: "Continue",
       }).then(() => {
-        navigate("/addtopup");
+        navigate("/AddBankDestils");
       });
   
     } catch (error) {

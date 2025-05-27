@@ -35,38 +35,46 @@ const DashboardMain = () => {
         const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
         if (response.data.Status) {
           const users = response.data.data;
-          
+
           let totalInvestmentAmount = 0;
           let totalRoiPayout = 0;
           let totalAffiliatePayout = 0;
 
           users.forEach(user => {
             // Total Investments
-            user.investment_info.forEach(investment => {
-              if (investment.investment_status === "Approved") {
-                totalInvestmentAmount += investment.invest_amount;
-              }
-            });
+            if (user.investment_info && Array.isArray(user.investment_info)) {
+              user.investment_info.forEach(investment => {
+                if (investment.investment_status === "Approved") {
+                  totalInvestmentAmount += investment.invest_amount || 0;
+                }
 
-            // ROI Payout
-            if (user.roi_payout_status) {
-              user.roi_payout_status.forEach(payout => {
-                if (payout.status === "Approved" && payout.amount) {
-                  totalRoiPayout += payout.amount;
+                // ROI Payout
+                if (investment.roi_payout_status && Array.isArray(investment.roi_payout_status)) {
+                  const hasApprovedPayout = investment.roi_payout_status.some(
+                    payout => payout.status === "Approved"
+                  );
+                  if (hasApprovedPayout && investment.net_amount_per_month) {
+                    totalRoiPayout += investment.net_amount_per_month;
+                  }
                 }
               });
             }
 
             // Affiliate Payout
-            if (user.referral_payouts) {
-              user.referral_payouts.forEach(payout => {
-                if (payout.status === "Approved" && payout.amount) {
-                  totalAffiliatePayout += payout.amount;
+            if (user.referrals && Array.isArray(user.referrals)) {
+              user.referrals.forEach(referral => {
+                if (referral.referral_payouts && Array.isArray(referral.referral_payouts)) {
+                  referral.referral_payouts.forEach(payout => {
+                    if (payout.status === "Approved" && payout.amount) {
+                      totalAffiliatePayout += payout.amount;
+                    }
+                  });
                 }
               });
             }
           });
 
+          // Set state
           setTotalInvestments(totalInvestmentAmount);
           setRoiPayout(totalRoiPayout);
           setAffiliatePayout(totalAffiliatePayout);
@@ -99,17 +107,18 @@ const DashboardMain = () => {
       icon: <MonetizationOn fontSize="large" />,
       color: "#f5ee24"
     },
-    
+
     {
       title: "Total Investments",
-      count: `Rs. ${totalInvestments.toLocaleString()}.00`,
+      count: `Rs. ${totalInvestments.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      ,
       icon: <AccountBalanceWallet fontSize="large" />,
       color: "#f5ee24"
     }
     ,
     {
       title: "Rank",
-     
+
       link: "/Rank",
       icon: <AccountBalanceWallet fontSize="large" />,
       color: "#f5ee24"
@@ -200,39 +209,6 @@ const DashboardMain = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Card
-            sx={{
-              padding: 2,
-              backgroundColor: "#fff",
-              borderRadius: 3,
-              boxShadow: 3
-            }}
-          >
-            <CardContent>
-              <Typography variant="h6" sx={{ color: "#004e99" }}>
-                Payout Overview
-              </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="amount"
-                    fill="#004e99"
-                    barSize={40}
-                    radius={[5, 5, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
     </div>
   );
