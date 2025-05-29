@@ -1,9 +1,46 @@
-import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+} from '@mui/material';
+import axios from 'axios';
 
 function AwardAchieversTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [awardRows, setAwardRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get('http://jointogain.ap-1.evennode.com/api/user/getAllUsersRewards')
+      .then((response) => {
+        const data = response.data?.data || [];
+
+        // Flatten rewards for table
+        const processed = data.flatMap((user) =>
+          (user.rewards || []).map((reward) => ({
+            user_profile_id: user.user_profile_id,
+            name: user.name,
+            reward_name: reward.reward_name,
+            reward_achieved_date: reward.reward_achieved_date,
+          }))
+        );
+
+        setAwardRows(processed);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      });
+  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -14,55 +51,55 @@ function AwardAchieversTable() {
     setPage(0);
   };
 
-  const awards = [
-    { SNo: 1, Username: 'G925616', Name: 'MRUTHYUNJAYA VEERAPPA KUBASAD', Award: 'Mobile', AchievedDate: '3/26/2025' },
-    { SNo: 2, Username: 'G375625', Name: 'Naveenkumar F Mulagund', Award: 'Mobile', AchievedDate: '3/21/2025' },
-    { SNo: 3, Username: 'G224469', Name: 'N S UMESH', Award: 'Laptop / India Trip', AchievedDate: '3/21/2025' },
-    { SNo: 4, Username: 'G143959', Name: 'SHASHIKANTH K B', Award: 'Laptop / India Trip', AchievedDate: '3/21/2025' },
-    { SNo: 5, Username: 'G129968', Name: 'ASHOK KUMAR P', Award: 'Mobile', AchievedDate: '3/21/2025' },
-    { SNo: 6, Username: 'G898355', Name: 'Ramesh S Mathad', Award: 'Bike / World Trip', AchievedDate: '3/20/2025' },
-    { SNo: 7, Username: 'G279248', Name: 'SHANTHAPPA HIRANNANAVAR', Award: 'Mobile', AchievedDate: '3/20/2025' },
-    { SNo: 8, Username: 'G632933', Name: 'KARABASAPPA VEERAPPA BIDARI', Award: 'Laptop / India Trip', AchievedDate: '3/16/2025' },
-    { SNo: 9, Username: 'G632933', Name: 'KARABASAPPA VEERAPPA BIDARI', Award: 'Mobile', AchievedDate: '3/16/2025' }
-  ];
-
   return (
-    <div>
-     
-      <TableContainer component={Paper}>
+    <div style={{ padding: '20px' }}>
       <h3>Award Achievers</h3>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>SNo</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Award</TableCell>
-              <TableCell>Achieved Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {awards.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-              <TableRow key={row.SNo}>
-                <TableCell>{row.SNo}</TableCell>
-                <TableCell>{row.Username}</TableCell>
-                <TableCell>{row.Name}</TableCell>
-                <TableCell>{row.Award}</TableCell>
-                <TableCell>{row.AchievedDate}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={awards.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>SNo</TableCell>
+                  <TableCell>User ID</TableCell>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Award</TableCell>
+                  <TableCell>Achieved Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {awardRows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                      <TableCell>{row.user_profile_id || 'N/A'}</TableCell>
+                      <TableCell>{row.name || 'N/A'}</TableCell>
+                      <TableCell>{row.reward_name || 'N/A'}</TableCell>
+                      <TableCell>
+                        {row.reward_achieved_date
+                          ? new Date(row.reward_achieved_date).toLocaleDateString()
+                          : 'N/A'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={awardRows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </>
+      )}
     </div>
   );
 }

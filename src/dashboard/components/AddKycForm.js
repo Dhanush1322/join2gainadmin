@@ -139,14 +139,25 @@ function AddKycForm() {
           </Box>
 
           <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2, background: "#1a1f36" }}
-          >
-            Submit
-          </Button>
+  type="submit"
+  variant="contained"
+  color="primary"
+  fullWidth
+  sx={{ mt: 2, background: "#1a1f36" }}
+>
+  Submit
+</Button>
+
+<Button
+  variant="outlined"
+  color="secondary"
+  fullWidth
+  sx={{ mt: 2 }}
+  onClick={() => navigate("/AddBankDestils")}
+>
+  Skip
+</Button>
+
         </form>
       </Box>
     </Container>

@@ -125,11 +125,23 @@ const navigate = useNavigate();
           </CardContent>
         </Card>
 
-        <Grid container justifyContent="center" sx={{ mt: 3 }}>
-          <Button type="submit" variant="contained" color="primary">
-            Save Bank Details
-          </Button>
-        </Grid>
+        <Grid container justifyContent="center" spacing={2} sx={{ mt: 3 }}>
+  <Grid item>
+    <Button type="submit" variant="contained" color="primary">
+      Save Bank Details
+    </Button>
+  </Grid>
+  <Grid item>
+    <Button
+      variant="outlined"
+      color="secondary"
+      onClick={() => navigate("/AddTopup")} // 👈 Navigate to the next step
+    >
+      Skip
+    </Button>
+  </Grid>
+</Grid>
+
       </form>
     </Container>
   );
