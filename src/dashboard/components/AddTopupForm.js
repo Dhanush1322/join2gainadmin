@@ -105,7 +105,7 @@ function AddTopupForm() {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: responseBody.message || "An error occurred",
+          text: responseBody.error || "An error occurred",
         });
       }
     } catch (error) {

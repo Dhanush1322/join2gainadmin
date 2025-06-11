@@ -60,46 +60,54 @@ function InvestmentRequestTable() {
     setStatusData((prev) => ({ ...prev, [id]: newStatus }));
   };
 
-  const handleSubmit = (id) => {
-    const selectedStatus = statusData[id] || "Pending";
+const handleSubmit = (id) => {
+  const selectedStatus = statusData[id];
 
-    fetch(`https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ investment_status: selectedStatus }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          Swal.fire({
-            title: selectedStatus === "Approved" ? "Approved" : "Rejected",
-            text: `Investment request has been ${selectedStatus.toLowerCase()} successfully!`,
-            icon: "success",
-            confirmButtonColor: "#3085d6",
-          }).then(() => {
-            fetchInvestmentData(); // 🔁 Fetch updated data after submission
-          });
-        } else {
-          Swal.fire({
-            title: "Success",
-            text: data.message || "Status updated successfully!",
-            icon: "success",
-            confirmButtonColor: "#3085d6",
-          }).then(() => {
-            fetchInvestmentData();
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Fetch Error:", error);
+  if (!selectedStatus) {
+    Swal.fire({
+      title: "Error",
+      text: "Please select a status before submitting.",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+    return;
+  }
+
+  fetch(`https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ investment_status: selectedStatus }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.Status === "Success") {
         Swal.fire({
-          title: "Error",
-          text: "Something went wrong!",
+          title: selectedStatus === "Approved" ? "Approved" : "Rejected",
+          text: data.message || `Investment request has been ${selectedStatus.toLowerCase()} successfully!`,
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+        }).then(() => {
+          fetchInvestmentData(); // Refresh updated data
+        });
+      } else {
+        Swal.fire({
+          title: "Update Failed",
+          text: data.message || "Status update failed!",
           icon: "error",
           confirmButtonColor: "#d33",
         });
+      }
+    })
+    .catch((error) => {
+      console.error("Fetch Error:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Something went wrong!",
+        icon: "error",
+        confirmButtonColor: "#d33",
       });
-  };
+    });
+};
 
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -157,14 +165,18 @@ function InvestmentRequestTable() {
 
                 <TableCell>
                   <Select
-                    value={statusData[record.id] || "Approved"}
-                    onChange={(event) => handleStatusChange(record.id, event.target.value)}
-                    sx={{ minWidth: 120 }}
-                  >
+  value={statusData[record.id] || ""}
+  onChange={(event) => handleStatusChange(record.id, event.target.value)}
+  sx={{ minWidth: 120 }}
+  displayEmpty
+>
+  <MenuItem disabled value="">
+    Select Status
+  </MenuItem>
+  <MenuItem value="Approved">Approve</MenuItem>
+  <MenuItem value="Rejected">Reject</MenuItem>
+</Select>
 
-                    <MenuItem value="Approved">Approve</MenuItem>
-                    <MenuItem value="Rejected">Rejected</MenuItem>
-                  </Select>
                 </TableCell>
                 <TableCell>
                   <Button
