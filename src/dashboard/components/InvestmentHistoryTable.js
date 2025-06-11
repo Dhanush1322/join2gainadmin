@@ -22,39 +22,45 @@ function InvestmentHistoryTable() {
     fetch("https://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
       .then((response) => response.json())
       .then((data) => {
-        console.log("API Response:", data); // Debugging
-
         if (data && data.Status && Array.isArray(data.users)) {
-          const formattedData = data.users.flatMap((user) =>
-            user.investment_info?.map((investment, index) => {
-              const approvedPayouts = investment.roi_payout_status?.filter(
-                (payout) => payout.status === "Approved"
-              ).length || 0;
-              const roiLeft =
-                (investment.invest_duration_in_month || 0) - approvedPayouts;
+         const formattedData = data.users.flatMap((user) =>
+  user.investment_info?.map((investment, index) => {
+    const approvedPayouts = investment.roi_payout_status?.filter(
+      (payout) => payout.status === "Approved"
+    ).length || 0;
 
-              return {
-                id: index + 1,
-                username: user.email || "N/A",
-                name: user.name || "N/A",
-                investDate: investment.invest_apply_date
-                  ? new Date(investment.invest_apply_date).toLocaleDateString()
-                  : "N/A",
-                amount: investment.invest_amount || 0,
-                status: investment.investment_status || "N/A",
-                roiLeft: roiLeft >= 0 ? roiLeft : 0, // Ensuring ROI Left doesn't go negative
-                investment_type: investment.invest_type,
-                invest_duration_in_month: investment.invest_duration_in_month,
-              };
-            }) || []
-          );
+    const roiLeft =
+      (investment.invest_duration_in_month || 0) - approvedPayouts;
 
-          // **Filter Only Approved and Rejected**
-          const filteredData = formattedData.filter(
-            (record) => record.status === "Approved" || record.status === "Reject"
-          );
+    const status = (investment.investment_status || "N/A").trim();
 
-          console.log("Filtered Data:", filteredData); // Debugging
+    return {
+      id: index + 1,
+      username: user.email || "N/A",
+      name: user.name || "N/A",
+      investDateRaw: investment.invest_apply_date || null,
+      investDate: investment.invest_apply_date
+        ? new Date(investment.invest_apply_date).toLocaleDateString()
+        : "N/A",
+      amount: investment.invest_amount || 0,
+      status,
+      roiLeft: roiLeft >= 0 ? roiLeft : 0,
+      investment_type: investment.invest_type,
+      invest_duration_in_month: investment.invest_duration_in_month,
+    };
+  }) || []
+);
+
+// ✅ Sort by investDateRaw (most recent first)
+formattedData.sort((a, b) => new Date(b.investDateRaw) - new Date(a.investDateRaw));
+
+// ✅ Filter for Approved or Rejected
+const filteredData = formattedData.filter(
+  (record) =>
+    record.status === "Approved" ||
+    record.status === "Rejected"
+);
+
           setInvestmentData(filteredData);
         } else {
           console.error("Unexpected API response structure:", data);
@@ -66,6 +72,7 @@ function InvestmentHistoryTable() {
   const filteredData = investmentData.filter((record) =>
     record.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -77,7 +84,7 @@ function InvestmentHistoryTable() {
         Investment History
       </Typography>
       <TextField
-        label="Search by Username"
+        label="Search by Email"
         variant="outlined"
         fullWidth
         sx={{ marginBottom: 2 }}
@@ -106,7 +113,7 @@ function InvestmentHistoryTable() {
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.investDate}</TableCell>
                 <TableCell>{record.investment_type}</TableCell>
-                <TableCell>{record.amount}</TableCell>
+                <TableCell>₹{record.amount.toLocaleString()}</TableCell>
                 <TableCell
                   style={{
                     color:
@@ -114,7 +121,7 @@ function InvestmentHistoryTable() {
                         ? "green"
                         : record.status === "Pending"
                         ? "orange"
-                        : record.status === "Reject"
+                        : record.status === "Rejected"
                         ? "red"
                         : "black",
                     fontWeight: "bold",

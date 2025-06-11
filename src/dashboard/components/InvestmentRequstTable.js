@@ -39,12 +39,13 @@ function InvestmentRequestTable() {
             id: invest._id,
             investment_status: invest.investment_status || " ",
             name: user.name, // 👈 attach the name from parent user object
+            date: invest.invest_apply_date,
           })) || []
         );
 
-        const pendingInvestments = investments.filter(
-          (invest) => invest.investment_status === " "
-        );
+        const pendingInvestments = investments
+          .filter((invest) => invest.investment_status === " ")
+          .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent
 
         setInvestmentData(pendingInvestments);
       })
@@ -117,9 +118,9 @@ function InvestmentRequestTable() {
               <TableCell>SNo</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Investment Type</TableCell>
+              <TableCell>Investment Date</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>UTR No.</TableCell>
-             
               <TableCell>Proof</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Action</TableCell>
@@ -131,9 +132,11 @@ function InvestmentRequestTable() {
                 <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.invest_type}</TableCell>
+                <TableCell>{new Date(record.date).toLocaleString('en-IN')}</TableCell>
+
                 <TableCell>₹{record.invest_amount.toLocaleString()}</TableCell>
                 <TableCell>{record.utr_no}</TableCell>
-              
+
                 <TableCell>
                   {record.uploaded_proof_file ? (
                     <a
@@ -154,13 +157,13 @@ function InvestmentRequestTable() {
 
                 <TableCell>
                   <Select
-                    value={statusData[record.id] || "Pending"}
+                    value={statusData[record.id] || "Approved"}
                     onChange={(event) => handleStatusChange(record.id, event.target.value)}
                     sx={{ minWidth: 120 }}
                   >
-                    <MenuItem value="Pending">Pending</MenuItem>
+
                     <MenuItem value="Approved">Approve</MenuItem>
-                    <MenuItem value="Rejected">Reject</MenuItem>
+                    <MenuItem value="Rejected">Rejected</MenuItem>
                   </Select>
                 </TableCell>
                 <TableCell>
