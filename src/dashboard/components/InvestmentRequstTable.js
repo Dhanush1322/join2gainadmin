@@ -60,54 +60,54 @@ function InvestmentRequestTable() {
     setStatusData((prev) => ({ ...prev, [id]: newStatus }));
   };
 
-const handleSubmit = (id) => {
-  const selectedStatus = statusData[id];
+  const handleSubmit = (id) => {
+    const selectedStatus = statusData[id];
 
-  if (!selectedStatus) {
-    Swal.fire({
-      title: "Error",
-      text: "Please select a status before submitting.",
-      icon: "error",
-      confirmButtonColor: "#d33",
-    });
-    return;
-  }
-
-  fetch(`https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ investment_status: selectedStatus }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.Status === "Success") {
-        Swal.fire({
-          title: selectedStatus === "Approved" ? "Approved" : "Rejected",
-          text: data.message || `Investment request has been ${selectedStatus.toLowerCase()} successfully!`,
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-        }).then(() => {
-          fetchInvestmentData(); // Refresh updated data
-        });
-      } else {
-        Swal.fire({
-          title: "Update Failed",
-          text: data.message || "Status update failed!",
-          icon: "error",
-          confirmButtonColor: "#d33",
-        });
-      }
-    })
-    .catch((error) => {
-      console.error("Fetch Error:", error);
+    if (!selectedStatus) {
       Swal.fire({
         title: "Error",
-        text: "Something went wrong!",
+        text: "Please select a status before submitting.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
-    });
-};
+      return;
+    }
+
+    fetch(`https://jointogain.ap-1.evennode.com/api/admin/addTopUPApprovedRejected/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ investment_status: selectedStatus }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.Status === "Success") {
+          Swal.fire({
+            title: selectedStatus === "Approved" ? "Approved" : "Rejected",
+            text: data.message || `Investment request has been ${selectedStatus.toLowerCase()} successfully!`,
+            icon: "success",
+            confirmButtonColor: "#3085d6",
+          }).then(() => {
+            fetchInvestmentData(); // Refresh updated data
+          });
+        } else {
+          Swal.fire({
+            title: "Update Failed",
+            text: data.message || "Status update failed!",
+            icon: "error",
+            confirmButtonColor: "#d33",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Fetch Error:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong!",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      });
+  };
 
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -165,17 +165,17 @@ const handleSubmit = (id) => {
 
                 <TableCell>
                   <Select
-  value={statusData[record.id] || ""}
-  onChange={(event) => handleStatusChange(record.id, event.target.value)}
-  sx={{ minWidth: 120 }}
-  displayEmpty
->
-  <MenuItem disabled value="">
-    Select Status
-  </MenuItem>
-  <MenuItem value="Approved">Approve</MenuItem>
-  <MenuItem value="Rejected">Reject</MenuItem>
-</Select>
+                    value={statusData[record.id] || ""}
+                    onChange={(event) => handleStatusChange(record.id, event.target.value)}
+                    sx={{ minWidth: 120 }}
+                    displayEmpty
+                  >
+                    <MenuItem disabled value="">
+                      Select Status
+                    </MenuItem>
+                    <MenuItem value="Approved">Approve</MenuItem>
+                    <MenuItem value="Rejected">Reject</MenuItem>
+                  </Select>
 
                 </TableCell>
                 <TableCell>

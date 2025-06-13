@@ -19,7 +19,7 @@ function AwardAchieversTable() {
 
   useEffect(() => {
     axios
-      .get('http://jointogain.ap-1.evennode.com/api/user/getAllUsersRewards')
+      .get('https://jointogain.ap-1.evennode.com/api/user/getAllUsersRewards')
       .then((response) => {
         const data = response.data?.data || [];
 
