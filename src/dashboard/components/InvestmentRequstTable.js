@@ -12,6 +12,8 @@ import {
   Select,
   MenuItem,
   Button,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import Swal from "sweetalert2";
 
@@ -20,8 +22,10 @@ function InvestmentRequestTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
   const [statusData, setStatusData] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const fetchInvestmentData = () => {
+    setLoading(true);
     fetch("https://jointogain.ap-1.evennode.com/api/user/getAllUsersTopUp")
       .then((response) => response.json())
       .then((data) => {
@@ -38,18 +42,19 @@ function InvestmentRequestTable() {
             uploaded_proof_file: invest.uploaded_proof_file,
             id: invest._id,
             investment_status: invest.investment_status || " ",
-            name: user.name, // 👈 attach the name from parent user object
+            name: user.name,
             date: invest.invest_apply_date,
           })) || []
         );
 
         const pendingInvestments = investments
           .filter((invest) => invest.investment_status === " ")
-          .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
 
         setInvestmentData(pendingInvestments);
       })
-      .catch((error) => console.error("Error fetching data:", error));
+      .catch((error) => console.error("Error fetching data:", error))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -87,7 +92,7 @@ function InvestmentRequestTable() {
             icon: "success",
             confirmButtonColor: "#3085d6",
           }).then(() => {
-            fetchInvestmentData(); // Refresh updated data
+            fetchInvestmentData();
           });
         } else {
           Swal.fire({
@@ -119,85 +124,91 @@ function InvestmentRequestTable() {
       <Typography variant="h6" gutterBottom>
         Investment Requests (Pending)
       </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>SNo</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Investment Type</TableCell>
-              <TableCell>Investment Date</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>UTR No.</TableCell>
-              <TableCell>Proof</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {currentRecords.map((record, index) => (
-              <TableRow key={record.id || index}>
-                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-                <TableCell>{record.name}</TableCell>
-                <TableCell>{record.invest_type}</TableCell>
-                <TableCell>{new Date(record.date).toLocaleString('en-IN')}</TableCell>
 
-                <TableCell>₹{record.invest_amount.toLocaleString()}</TableCell>
-                <TableCell>{record.utr_no}</TableCell>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>SNo</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Investment Type</TableCell>
+                  <TableCell>Investment Date</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>UTR No.</TableCell>
+                  <TableCell>Proof</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {currentRecords.map((record, index) => (
+                  <TableRow key={record.id || index}>
+                    <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                    <TableCell>{record.name}</TableCell>
+                    <TableCell>{record.invest_type}</TableCell>
+                    <TableCell>{new Date(record.date).toLocaleString("en-IN")}</TableCell>
+                    <TableCell>₹{record.invest_amount.toLocaleString()}</TableCell>
+                    <TableCell>{record.utr_no}</TableCell>
+                    <TableCell>
+                      {record.uploaded_proof_file ? (
+                        <a
+                          href={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile?fileUrl=${record.uploaded_proof_file}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile?fileUrl=${record.uploaded_proof_file}`}
+                            alt="Proof"
+                            style={{ width: "100px", height: "auto", borderRadius: "5px" }}
+                          />
+                        </a>
+                      ) : (
+                        "No file"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={statusData[record.id] || ""}
+                        onChange={(event) => handleStatusChange(record.id, event.target.value)}
+                        sx={{ minWidth: 120 }}
+                        displayEmpty
+                      >
+                        <MenuItem disabled value="">
+                          Select Status
+                        </MenuItem>
+                        <MenuItem value="Approved">Approve</MenuItem>
+                        <MenuItem value="Rejected">Reject</MenuItem>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleSubmit(record.id)}
+                      >
+                        Submit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-                <TableCell>
-                  {record.uploaded_proof_file ? (
-                    <a
-                      href={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile/${record.uploaded_proof_file}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={`https://jointogain.ap-1.evennode.com/api/user/downloadTopupFile/${record.uploaded_proof_file}`}
-                        alt="Proof"
-                        style={{ width: "100px", height: "auto", borderRadius: "5px" }}
-                      />
-                    </a>
-                  ) : (
-                    "No file"
-                  )}
-                </TableCell>
-
-                <TableCell>
-                  <Select
-                    value={statusData[record.id] || ""}
-                    onChange={(event) => handleStatusChange(record.id, event.target.value)}
-                    sx={{ minWidth: 120 }}
-                    displayEmpty
-                  >
-                    <MenuItem disabled value="">
-                      Select Status
-                    </MenuItem>
-                    <MenuItem value="Approved">Approve</MenuItem>
-                    <MenuItem value="Rejected">Reject</MenuItem>
-                  </Select>
-
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleSubmit(record.id)}
-                  >
-                    Submit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Pagination
-        count={totalPages}
-        page={currentPage}
-        onChange={(event, value) => setCurrentPage(value)}
-        sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}
-      />
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(event, value) => setCurrentPage(value)}
+            sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}
+          />
+        </>
+      )}
     </Paper>
   );
 }

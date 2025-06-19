@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, Dialog, DialogContent, TextField, Stack
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, Pagination, Dialog, DialogContent, TextField, Stack, Skeleton
 } from "@mui/material";
-import { CSVLink } from "react-csv"; // Install this via `npm install react-csv`
+import { CSVLink } from "react-csv";
 
 const WithdrawHistoryTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,9 +15,11 @@ const WithdrawHistoryTable = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [loading, setLoading] = useState(false);
   const recordsPerPage = 10;
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
       const formattedData = response.data.data.flatMap((user) =>
@@ -51,6 +54,8 @@ const WithdrawHistoryTable = () => {
       setFilteredData(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,9 +97,7 @@ const WithdrawHistoryTable = () => {
 
   return (
     <Paper sx={{ padding: 2, margin: 2 }}>
-      <h3>Withdraw Request List</h3>
-      <br />
-      {/* Filter Inputs */}
+      <h3>Withdraw Request History List</h3>
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <TextField
           type="date"
@@ -130,7 +133,6 @@ const WithdrawHistoryTable = () => {
               { label: "Date", key: "date" },
               { label: "Payout Date", key: "payoutDate" }
             ]}
-            className="btn btn-success"
           >
             <Button variant="contained" color="success">Download CSV</Button>
           </CSVLink>
@@ -158,24 +160,38 @@ const WithdrawHistoryTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentRecords.map((record, index) => (
-              <TableRow key={`${record.userID}-${index}`}>
-                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-                <TableCell>{record.name}</TableCell>
-                <TableCell>{record.investedamount}</TableCell>
-                <TableCell>{record.invest_type}</TableCell>
-                <TableCell style={{ color: "green", fontWeight: "bold" }}>{record.invest_duration_in_month}</TableCell>
-                <TableCell style={{ color: "red", fontWeight: "bold" }}>{record.remainingmonth}</TableCell>
-                <TableCell>{record.availableCredit}</TableCell>
-                <TableCell>{record.amountReq}</TableCell>
-                <TableCell>{record.tds}</TableCell>
-                <TableCell>{record.sc}</TableCell>
-                <TableCell>{record.netPay}</TableCell>
-                <TableCell>{record.date}</TableCell>
-                <TableCell>{record.payoutDate}</TableCell>
-                <TableCell style={{ color: "green", fontWeight: "bold" }}>Approved</TableCell>
+            {loading ? (
+              [...Array(recordsPerPage)].map((_, idx) => (
+                <TableRow key={idx}>
+                  {Array(14).fill().map((_, cellIdx) => (
+                    <TableCell key={cellIdx}><Skeleton variant="text" width="80%" /></TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : currentRecords.length > 0 ? (
+              currentRecords.map((record, index) => (
+                <TableRow key={`${record.userID}-${index}`}>
+                  <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                  <TableCell>{record.name}</TableCell>
+                  <TableCell>{record.investedamount}</TableCell>
+                  <TableCell>{record.invest_type}</TableCell>
+                  <TableCell style={{ color: "green", fontWeight: "bold" }}>{record.invest_duration_in_month}</TableCell>
+                  <TableCell style={{ color: "red", fontWeight: "bold" }}>{record.remainingmonth}</TableCell>
+                  <TableCell>{record.availableCredit}</TableCell>
+                  <TableCell>{record.amountReq}</TableCell>
+                  <TableCell>{record.tds}</TableCell>
+                  <TableCell>{record.sc}</TableCell>
+                  <TableCell>{record.netPay}</TableCell>
+                  <TableCell>{record.date}</TableCell>
+                  <TableCell>{record.payoutDate}</TableCell>
+                  <TableCell style={{ color: "green", fontWeight: "bold" }}>Approved</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={14} align="center">No records found</TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>

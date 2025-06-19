@@ -114,7 +114,7 @@ const LevelIncomePaidListTable = () => {
   return (
     <div style={{ padding: 16 }}>
       <Typography variant="h5" gutterBottom>
-        All Users – Level Income Payouts
+        All Users – Level Income Withdraw Payouts History 
       </Typography>
 
       {/* Filter Section */}

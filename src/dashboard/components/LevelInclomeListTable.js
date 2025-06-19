@@ -26,8 +26,8 @@ const LevelIncomeListTable = () => {
 
         const payoutsToFetch = [];
 
-        // const today = new Date();
-        const today = new Date("2025-07-02"); // YYYY-MM-DD format
+       const today = new Date();
+       // const today = new Date("2025-07-02"); // YYYY-MM-DD format
         today.setHours(0, 0, 0, 0); // strip time
         for (const user of data.data) {
           if (!user.referral_payouts) continue;
@@ -146,7 +146,7 @@ const LevelIncomeListTable = () => {
   };
 
   const handleOpen = (imageName) => {
-    const imageUrl = `https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile/${imageName}`;
+    const imageUrl = `https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile?fileUrl=${imageName}`;
     setSelectedImage(imageUrl);
     setOpen(true);
   };
@@ -159,7 +159,7 @@ const LevelIncomeListTable = () => {
   return (
     <div style={{ padding: 16 }}>
       <Typography variant="h5" gutterBottom>
-        All Users – Level Income Payouts
+        All Users – Pending Level Income Payouts List
       </Typography>
 
       {loading ? (

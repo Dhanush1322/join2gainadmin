@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, TablePagination,
-  Typography, Box,
+  Typography, Box, CircularProgress
 } from '@mui/material';
 
 function ViewAllDownlineTable({ userId }) {
@@ -10,8 +10,10 @@ function ViewAllDownlineTable({ userId }) {
   const [topUser, setTopUser] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
 
   const fetchDownlineData = async (id) => {
+    setLoading(true);
     try {
       const response = await fetch(`https://jointogain.ap-1.evennode.com/api/user/getUser/${id}`, {
         method: 'GET',
@@ -48,6 +50,8 @@ function ViewAllDownlineTable({ userId }) {
     } catch (error) {
       console.error('Error fetching downline:', error);
       setData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +62,6 @@ function ViewAllDownlineTable({ userId }) {
   }, [userId]);
 
   const handleRowClick = (user) => {
-    // When user is clicked, fetch their downline as new top-level user
     fetchDownlineData(user._id);
     setPage(0);
   };
@@ -79,59 +82,69 @@ function ViewAllDownlineTable({ userId }) {
           {topUser ? `Referrals of ${topUser.name}` : 'Downline Members'}
         </Typography>
       </Box>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>SNo.</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>Level</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Investment (Rs)</TableCell>
-              <TableCell>Join Date</TableCell>
-              <TableCell>Activation Status</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">No data available</TableCell>
-              </TableRow>
-            ) : (
-              data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => (
-                  <TableRow
-                    hover
-                    key={row._id}
-                    onClick={() => handleRowClick(row)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <TableCell>{index + 1 + page * rowsPerPage}</TableCell>
-                    <TableCell>{row.user_profile_id}</TableCell>
-                    <TableCell>{row.user_level}</TableCell>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>
-                      {row.investment_info?.length > 0
-                        ? row.investment_info.reduce((sum, inv) => sum + (inv.invest_amount || 0), 0).toLocaleString('en-IN')
-                        : 'N/A'}
-                    </TableCell>
-                    <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>{row.user_status === 'Inactive' ? 'Inactive' : 'Active'}</TableCell>
+
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>SNo.</TableCell>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Level</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Investment (Rs)</TableCell>
+                  <TableCell>Join Date</TableCell>
+                  <TableCell>Activation Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">No data available</TableCell>
                   </TableRow>
-                ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        component="div"
-        count={data.length}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
+                ) : (
+                  data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => (
+                      <TableRow
+                        hover
+                        key={row._id}
+                        onClick={() => handleRowClick(row)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <TableCell>{index + 1 + page * rowsPerPage}</TableCell>
+                        <TableCell>{row.user_profile_id}</TableCell>
+                        <TableCell>{row.user_level}</TableCell>
+                        <TableCell>{row.name}</TableCell>
+                        <TableCell>
+                          {row.investment_info?.length > 0
+                            ? row.investment_info.reduce((sum, inv) => sum + (inv.invest_amount || 0), 0).toLocaleString('en-IN')
+                            : 'N/A'}
+                        </TableCell>
+                        <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{row.user_status === 'Inactive' ? 'Inactive' : 'Active'}</TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            component="div"
+            count={data.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
+        </>
+      )}
     </Paper>
   );
 }

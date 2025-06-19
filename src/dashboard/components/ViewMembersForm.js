@@ -12,6 +12,8 @@ import {
   Typography,
   TextField,
   Stack,
+  CircularProgress,
+  Box
 } from "@mui/material";
 import Swal from 'sweetalert2';
 import axios from "axios";
@@ -23,6 +25,7 @@ function ViewMembersForm() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,14 +37,16 @@ function ViewMembersForm() {
   }, [searchTerm, users]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
       if (response.data.Status) {
         setUsers(response.data.data);
-        console.log("Users fetched successfully:", response.data.data);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,78 +132,85 @@ function ViewMembersForm() {
         </Button>
       </Stack>
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Mobile</TableCell>
-              <TableCell>Userid</TableCell>
-              <TableCell>Password</TableCell>
-              <TableCell>Plan</TableCell>
-              <TableCell>Total Investment</TableCell>
-              <TableCell>Join Date</TableCell>
-              <TableCell>Profile</TableCell>
-              <TableCell>Downline</TableCell>
-              <TableCell>Delete</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              const totalInvestment = row.investment_info
-                ? row.investment_info.reduce((acc, inv) => acc + (inv.invest_amount || 0), 0)
-                : 0;
-
-              return (
-                <TableRow key={row._id}>
-                  <TableCell>{row.user_profile_id}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.phone_no}</TableCell>
-                    <TableCell>{row.user_profile_id}</TableCell>
-                  <TableCell>{row.password}</TableCell>
-                
-                  <TableCell>
-                    <Button variant="contained" size="small" onClick={() => navigate(`/ViewPlan/${row._id}`)}>
-                      View
-                    </Button>
-                  </TableCell>
-                  <TableCell>Rs. {totalInvestment}</TableCell>
-                  <TableCell>{new Date(row.createdAt).toLocaleDateString("en-GB")}</TableCell>
-                  <TableCell>
-                    <Button variant="contained" size="small" onClick={() => navigate(`/VieAllProfile/${row._id}`)}>
-                      View
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="contained" color="secondary" size="small" onClick={() => navigate(`/ViewAllDownline/${row._id}`)}>
-                      View
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="contained" color="error" size="small" onClick={() => handleDelete(row._id)}>
-                      Delete
-                    </Button>
-                  </TableCell>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Mobile</TableCell>
+                  <TableCell>Userid</TableCell>
+                  <TableCell>Password</TableCell>
+                  <TableCell>Plan</TableCell>
+                  <TableCell>Total Investment</TableCell>
+                  <TableCell>Join Date</TableCell>
+                  <TableCell>Profile</TableCell>
+                  <TableCell>Downline</TableCell>
+                  <TableCell>Delete</TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              </TableHead>
+              <TableBody>
+                {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                  const totalInvestment = row.investment_info
+                    ? row.investment_info.reduce((acc, inv) => acc + (inv.invest_amount || 0), 0)
+                    : 0;
 
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredUsers.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(parseInt(e.target.value, 10));
-          setPage(0);
-        }}
-      />
+                  return (
+                    <TableRow key={row._id}>
+                      <TableCell>{row.user_profile_id}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>{row.phone_no}</TableCell>
+                      <TableCell>{row.user_profile_id}</TableCell>
+                      <TableCell>{row.password}</TableCell>
+                      <TableCell>
+                        <Button variant="contained" size="small" onClick={() => navigate(`/ViewPlan/${row._id}`)}>
+                          View
+                        </Button>
+                      </TableCell>
+                      <TableCell>Rs. {totalInvestment}</TableCell>
+                      <TableCell>{new Date(row.createdAt).toLocaleDateString("en-GB")}</TableCell>
+                      <TableCell>
+                        <Button variant="contained" size="small" onClick={() => navigate(`/VieAllProfile/${row._id}`)}>
+                          View
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="contained" color="secondary" size="small" onClick={() => navigate(`/ViewAllDownline/${row._id}`)}>
+                          View
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="contained" color="error" size="small" onClick={() => handleDelete(row._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={filteredUsers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+          />
+        </>
+      )}
     </Paper>
   );
 }

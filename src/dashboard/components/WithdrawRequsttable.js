@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, Dialog, DialogContent,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, Pagination, Dialog, DialogContent, Skeleton, Box
 } from "@mui/material";
 
 const WithdrawRequestTable = () => {
@@ -10,28 +11,26 @@ const WithdrawRequestTable = () => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [withdrawData, setWithdrawData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const recordsPerPage = 10;
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
-  
+
       const today = new Date().toLocaleDateString();
-     // const today = new Date("2025-05-20").toLocaleDateString();
-  
       const formattedData = response.data.data.flatMap((user) =>
         user.investment_info?.flatMap((investment) => {
           const pendingPayout = investment.roi_payout_status?.find((payout) => payout.status === "Pending");
-  
           if (!pendingPayout) return [];
-  
+
           const payoutDate = new Date(pendingPayout.payout_date).toLocaleDateString();
-  
           if (payoutDate !== today) return [];
-  
+
           const approvedPayoutsCount = investment.roi_payout_status?.filter(payout => payout.status === "Approved").length || 0;
           const remainingMonths = (investment.invest_duration_in_month || 0) - approvedPayoutsCount;
-  
+
           return [{
             userID: user.user_profile_id,
             name: user.name,
@@ -52,15 +51,17 @@ const WithdrawRequestTable = () => {
           }];
         })
       );
-  
+
       setWithdrawData(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   useEffect(() => {
-    fetchData(); // Call fetchData inside useEffect
+    fetchData();
   }, []);
 
   const handleSend = async (id, investmentid) => {
@@ -83,7 +84,7 @@ const WithdrawRequestTable = () => {
 
           if (response.status) {
             Swal.fire("Approved!", "Withdrawal request approved successfully.", "success");
-            fetchData(); // Fetch latest data after approval
+            fetchData();
           } else {
             Swal.fire("Error!", "Failed to approve withdrawal!", "error");
           }
@@ -101,11 +102,11 @@ const WithdrawRequestTable = () => {
   const totalPages = Math.ceil(withdrawData.length / recordsPerPage);
 
   const handleOpen = (imageName) => {
-    const imageUrl = `https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile/${imageName}`;
+    const imageUrl = `https://jointogain.ap-1.evennode.com/api/user/downloadBankPassbookFile?fileUrl=${imageName}`;
     setSelectedImage(imageUrl);
     setOpen(true);
   };
-  
+
   return (
     <Paper sx={{ padding: 2, margin: 2 }}>
       <h3>Withdraw Request List</h3>
@@ -114,12 +115,11 @@ const WithdrawRequestTable = () => {
           <TableHead>
             <TableRow>
               <TableCell>No</TableCell>
-             
               <TableCell>Name</TableCell>
               <TableCell>Invested Amount</TableCell>
-              <TableCell>Investment  Type</TableCell>
-              <TableCell>Investment  Duration </TableCell>
-              <TableCell>Remaining Month  </TableCell>
+              <TableCell>Investment Type</TableCell>
+              <TableCell>Investment Duration</TableCell>
+              <TableCell>Remaining Month</TableCell>
               <TableCell>Available Credit</TableCell>
               <TableCell>Amount Req</TableCell>
               <TableCell>TDS</TableCell>
@@ -132,29 +132,38 @@ const WithdrawRequestTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentRecords.map((record, index) => (
-              <TableRow key={`${record.userID}-${index}`}>
-                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-               
-                <TableCell>{record.name}</TableCell>
-                <TableCell>{record.investedamount}</TableCell>
-                <TableCell>{record.invest_type}</TableCell>
-                <TableCell style={{ color: "green", fontWeight: "bold" }}>{record.invest_duration_in_month}</TableCell>
-                <TableCell style={{ color: "red", fontWeight: "bold" }}>{record.remainingmonth}</TableCell>
-                <TableCell>{record.availableCredit}</TableCell>
-                <TableCell>{record.amountReq}</TableCell>
-                <TableCell>{record.tds}</TableCell>
-                <TableCell>{record.sc}</TableCell>
-                <TableCell>{record.netPay}</TableCell>
-                <TableCell>{record.date}</TableCell>
-                <TableCell>{record.payoutDate}</TableCell>
-                <TableCell>
-                  <Button variant="contained" color="primary" size="small" onClick={() => handleOpen(record.bankImage)}>
-                    View
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <div style={{ display: "flex", gap: "8px" }}>
+            {loading ? (
+              [...Array(recordsPerPage)].map((_, index) => (
+                <TableRow key={index}>
+                  {Array(15).fill().map((_, idx) => (
+                    <TableCell key={idx}>
+                      <Skeleton variant="text" width="80%" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : currentRecords.length > 0 ? (
+              currentRecords.map((record, index) => (
+                <TableRow key={`${record.userID}-${index}`}>
+                  <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                  <TableCell>{record.name}</TableCell>
+                  <TableCell>{record.investedamount}</TableCell>
+                  <TableCell>{record.invest_type}</TableCell>
+                  <TableCell style={{ color: "green", fontWeight: "bold" }}>{record.invest_duration_in_month}</TableCell>
+                  <TableCell style={{ color: "red", fontWeight: "bold" }}>{record.remainingmonth}</TableCell>
+                  <TableCell>{record.availableCredit}</TableCell>
+                  <TableCell>{record.amountReq}</TableCell>
+                  <TableCell>{record.tds}</TableCell>
+                  <TableCell>{record.sc}</TableCell>
+                  <TableCell>{record.netPay}</TableCell>
+                  <TableCell>{record.date}</TableCell>
+                  <TableCell>{record.payoutDate}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="primary" size="small" onClick={() => handleOpen(record.bankImage)}>
+                      View
+                    </Button>
+                  </TableCell>
+                  <TableCell>
                     <Button
                       variant="contained"
                       color="success"
@@ -163,10 +172,14 @@ const WithdrawRequestTable = () => {
                     >
                       Send
                     </Button>
-                  </div>
-                </TableCell>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={15} align="center">No records found</TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -178,10 +191,11 @@ const WithdrawRequestTable = () => {
         sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}
       />
 
-      {/* Dialog for Viewing Bank Image */}
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          {selectedImage && <img src={selectedImage} alt="Bank Proof" style={{ width: "100%", maxHeight: "500px" }} />}
+          {selectedImage && (
+            <img src={selectedImage} alt="Bank Proof" style={{ width: "100%", maxHeight: "500px" }} />
+          )}
         </DialogContent>
       </Dialog>
     </Paper>
