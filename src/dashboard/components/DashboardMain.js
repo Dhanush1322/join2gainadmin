@@ -35,7 +35,7 @@ const DashboardMain = () => {
         const response = await axios.get("https://jointogain.ap-1.evennode.com/api/user/getUsers");
         if (response.data.Status) {
           const users = response.data.data;
-
+          
           let totalInvestmentAmount = 0;
           let totalRoiPayout = 0;
           let totalAffiliatePayout = 0;

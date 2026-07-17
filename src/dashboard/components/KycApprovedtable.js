@@ -78,13 +78,14 @@ function KycApprovedTable() {
         })
           .then((res) => res.json())
           .then((data) => {
-            if (data.data.Status) {
+            if (data.user && data.user.kyc_status === status) {
               fetchUsers(); // Refresh data
               Swal.fire({
-                title: `User ${status} successfully!`,
+                title: `KYC ${status} Successfully!`,
+                text: `The user's KYC has been ${status.toLowerCase()} successfully.`,
                 icon: "success",
-                timer: 1500,
-                showConfirmButton: false,
+                confirmButtonText: "OK",
+                confirmButtonColor: "#0072a0"
               });
             } else {
               Swal.fire("Error", `Failed to ${status.toLowerCase()} user.`, "error");
@@ -97,7 +98,7 @@ function KycApprovedTable() {
       }
     });
   };
-
+   
   return (
     <div style={{ padding: "16px" }}>
       <Typography variant="h4" gutterBottom>
